@@ -1,0 +1,286 @@
+@extends('layouts.app')
+
+@section('title', 'Members')
+@section('header', 'Members Management')
+@section('subtitle', 'Manage congregation members and their information')
+
+@push('head')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" integrity="sha512-+S0Hf2YQWGWpZJm7x46HWQHIokX1CPG3cs5FqZZ+cRcYfKzvVfMZsql+RfVU07uSjBxPxz3yZnbzUYSvM1z4Ow==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+@endpush
+
+@section('content')
+<div class="flex justify-between items-center mb-6">
+    <div class="flex items-center space-x-4">
+        <p class="text-gray-600">Total Members: <span class="font-bold text-deep-brown">{{ $members->total() }}</span></p>
+        <form method="GET" action="{{ route('members.index') }}" class="flex items-center">
+            <input type="text" name="q" placeholder="Search members..." value="{{ request('q') }}" class="px-3 py-2 border border-gray-300 rounded-l-md text-sm" />
+            <button type="submit" class="px-3 py-2 bg-saffron text-white rounded-r-md text-sm">
+                <i class="fas fa-search"></i>
+            </button>
+        </form>
+    </div>
+    <button onclick="openModal('createMemberModal')" class="btn-spiritual px-6 py-2 text-white rounded-lg font-medium flex items-center space-x-2">
+        <i class="fas fa-plus"></i>
+        <span>Add Member</span>
+    </button>
+</div>
+
+<div class="card-spiritual overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 border-b border-gray-200">
+                <tr>
+                    <th class="text-left py-4 px-6 font-semibold text-gray-700">Member ID</th>
+                    <th class="text-left py-4 px-6 font-semibold text-gray-700">Role</th>
+                    <th class="text-left py-4 px-6 font-semibold text-gray-700">Name</th>
+                    <th class="text-left py-4 px-6 font-semibold text-gray-700">Email</th>
+                    <th class="text-left py-4 px-6 font-semibold text-gray-700">Phone</th>
+                    <th class="text-center py-4 px-6 font-semibold text-gray-700">Status</th>
+                    <th class="text-right py-4 px-6 font-semibold text-gray-700">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($members as $member)
+                    <tr class="border-b border-gray-100 hover:bg-gray-50">
+                        <td class="py-4 px-6 text-xs font-mono text-saffron">{{ $member->member_id }}</td>
+                        <td class="py-4 px-6 text-gray-800">{{ ucfirst($member->user->role) }}</td>
+                        <td class="py-4 px-6">
+                            <span class="font-medium text-deep-brown">{{ $member->user->name }}</span>
+                        </td>
+                        <td class="py-4 px-6 text-gray-600">{{ $member->user->email }}</td>
+                        <td class="py-4 px-6 text-gray-600">{{ $member->phone ?? '-' }}</td>                        <td class="py-4 px-6 text-center">
+                            @if($member->is_active)
+                                <span class="inline-block px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">Active</span>
+                            @else
+                                <span class="inline-block px-3 py-1 bg-gray-200 text-gray-700 text-xs font-semibold rounded-full">Inactive</span>
+                            @endif
+                        </td>
+                        <td class="py-4 px-6 text-right">
+                            <a href="{{ route('members.show', $member) }}" class="text-saffron hover:text-rust text-sm font-medium">View</a>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="7" class="py-8 px-6 text-center text-gray-600">No members found</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="mt-6">
+    {{ $members->links() }}
+</div>
+
+<!-- create member modal -->
+<div id="createMemberModal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 hidden">
+    <div class="modal-content bg-white rounded-lg w-11/12 max-w-3xl p-8 relative overflow-auto max-h-[90vh]">
+        <button class="absolute top-2 right-2 text-gray-500" onclick="closeModal('createMemberModal')">&times;</button>
+        <h2 class="text-2xl font-semibold text-deep-brown mb-4">New Member Registration</h2>
+        <form action="{{ route('members.store') }}" method="POST" class="space-y-6">
+            @csrf
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Name -->
+                <div class="md:col-span-2">
+                    <label for="name" class="block text-sm font-semibold text-deep-brown mb-2">
+                        <i class="fas fa-user text-saffron"></i> Full Name *
+                    </label>
+                    <input type="text" name="name" id="name" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-saffron focus:ring-2 focus:ring-saffron/20"
+                        value="{{ old('name') }}">
+                    @error('name')
+                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Role -->
+                <div class="md:col-span-2">
+                    <label for="role" class="block text-sm font-semibold text-deep-brown mb-2">
+                        <i class="fas fa-user-tag text-saffron"></i> Role *
+                    </label>
+                    <select name="role" id="role" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-saffron focus:ring-2 focus:ring-saffron/20">
+                        <option value="">-- Select Role --</option>
+                        @foreach($roles as $r)
+                            <option value="{{ $r }}" {{ old('role') == $r ? 'selected' : '' }}>{{ ucfirst($r) }}</option>
+                        @endforeach
+                    </select>
+                    @error('role')
+                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Profile Image -->
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-semibold text-deep-brown mb-2">
+                        <i class="fas fa-camera text-saffron"></i> Profile Photo
+                    </label>
+                    <input type="file" accept="image/*" id="profileImageInput" class="mb-2" />
+                    <input type="hidden" name="profile_image" id="profileImageData" value="{{ old('profile_image') }}" />
+                    <div id="profilePreview" class="w-32 h-32 rounded-full bg-gray-100 overflow-hidden">
+                        <img id="profileImagePreview" src="" class="w-full h-full object-cover hidden" />
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="md:col-span-2">
+                    <label for="email" class="block text-sm font-semibold text-deep-brown mb-2">
+                        <i class="fas fa-envelope text-saffron"></i> Email *
+                    </label>
+                    <input type="email" name="email" id="email" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-saffron focus:ring-2 focus:ring-saffron/20"
+                        value="{{ old('email') }}">
+                    @error('email')
+                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Phone -->
+                <div>
+                    <label for="phone" class="block text-sm font-semibold text-deep-brown mb-2">
+                        <i class="fas fa-phone text-saffron"></i> Phone
+                    </label>
+                    <input type="tel" name="phone" id="phone"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-saffron focus:ring-2 focus:ring-saffron/20"
+                        value="{{ old('phone') }}">
+                </div>
+
+                <!-- Birth Date -->
+                <div>
+                    <label for="birth_date" class="block text-sm font-semibold text-deep-brown mb-2">
+                        <i class="fas fa-birthday-cake text-saffron"></i> Birth Date
+                    </label>
+                    <input type="date" name="birth_date" id="birth_date"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-saffron focus:ring-2 focus:ring-saffron/20"
+                        value="{{ old('birth_date') }}">
+                </div>
+
+                <!-- Address -->
+                <div class="md:col-span-2">
+                    <label for="address" class="block text-sm font-semibold text-deep-brown mb-2">
+                        <i class="fas fa-map-marker-alt text-saffron"></i> Address
+                    </label>
+                    <input type="text" name="address" id="address"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-saffron focus:ring-2 focus:ring-saffron/20"
+                        value="{{ old('address') }}">
+                </div>
+
+                <!-- Coordinates and map picker -->
+                <div class="md:col-span-2">
+                    <div id="map" class="w-full h-64 rounded-lg mb-2"></div>
+                    <input type="hidden" name="latitude" id="latitude" value="{{ old('latitude') }}">
+                    <input type="hidden" name="longitude" id="longitude" value="{{ old('longitude') }}">
+                </div>
+
+                <!-- City -->
+                <div>
+                    <label for="city" class="block text-sm font-semibold text-deep-brown mb-2">
+                        <i class="fas fa-city text-saffron"></i> City
+                    </label>
+                    <input type="text" name="city" id="city"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-saffron focus:ring-2 focus:ring-saffron/20"
+                        value="{{ old('city') }}">
+                </div>
+
+                <!-- Province -->
+                <div>
+                    <label for="province" class="block text-sm font-semibold text-deep-brown mb-2">
+                        <i class="fas fa-map text-saffron"></i> Province
+                    </label>
+                    <input type="text" name="province" id="province"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-saffron focus:ring-2 focus:ring-saffron/20"
+                        value="{{ old('province') }}">
+                </div>
+
+                <!-- Postal Code -->
+                <div>
+                    <label for="postal_code" class="block text-sm font-semibold text-deep-brown mb-2">
+                        <i class="fas fa-mail-bulk text-saffron"></i> Postal Code
+                    </label>
+                    <input type="text" name="postal_code" id="postal_code"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-saffron focus:ring-2 focus:ring-saffron/20"
+                        value="{{ old('postal_code') }}">
+                </div>
+            </div>
+
+            <div class="flex space-x-4 pt-6 border-t border-gray-200">
+                <button type="submit" class="btn-spiritual px-6 py-2 text-white rounded-lg font-medium">
+                    <i class="fas fa-save mr-2"></i> Register Member
+                </button>
+                <button type="button" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50" onclick="closeModal('createMemberModal')">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+@endsection
+    <!-- cropping modal -->
+    <div id="cropModal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 hidden">
+        <div class="modal-content bg-white rounded-lg w-full max-w-lg p-6 relative">
+            <button class="absolute top-2 right-2 text-gray-500" onclick="closeCrop()">&times;</button>
+            <h3 class="text-lg font-semibold text-deep-brown mb-2">Crop Profile Photo</h3>
+            <div class="overflow-auto">
+                <img id="cropperImage" src="" class="max-w-full" />
+            </div>
+            <div class="mt-4 flex justify-end space-x-2">
+                <button type="button" class="btn-spiritual px-4 py-2 text-white rounded" onclick="applyCrop()">Crop</button>
+                <button type="button" class="px-4 py-2 border rounded" onclick="closeCrop()">Cancel</button>
+            </div>
+        </div>
+    </div>
+@push('scripts')
+<script>
+function initMemberMap() {
+    const latInput = document.getElementById('latitude');
+    const lngInput = document.getElementById('longitude');
+    let lat = parseFloat(latInput.value) || -6.200000;
+    let lng = parseFloat(lngInput.value) || 106.816666;
+    const map = new google.maps.Map(document.getElementById('map'), { center: {lat, lng}, zoom: 13 });
+    const marker = new google.maps.Marker({ position: {lat, lng}, map: map, draggable: true });
+    marker.addListener('dragend', function(e) {
+        latInput.value = e.latLng.lat();
+        lngInput.value = e.latLng.lng();
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ location: e.latLng }, function(results, status) {
+            if (status === 'OK' && results[0]) {
+                document.getElementById('address').value = results[0].formatted_address;
+            }
+        });
+    });
+}
+</script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_key') }}&callback=initMemberMap&libraries=places"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js" integrity="sha512-+/4ODD9CFmQ2wXYSPTDaJCW+U8URq4nqZNcYlVv+bU4VPkCnHQysdOkqD3UBqUGvmV9pUz+Jq3dLdFi78GX4mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+let cropper;
+function openCrop(){ document.getElementById('cropModal').classList.add('active'); }
+function closeCrop(){ document.getElementById('cropModal').classList.remove('active'); }
+function applyCrop(){
+    if(!cropper) return;
+    const canvas = cropper.getCroppedCanvas({width:300,height:300});
+    const dataUrl = canvas.toDataURL('image/png');
+    document.getElementById('profileImageData').value = dataUrl;
+    const preview = document.getElementById('profileImagePreview');
+    preview.src = dataUrl;
+    preview.classList.remove('hidden');
+    closeCrop();
+}
+
+document.getElementById('profileImageInput').addEventListener('change', function(e){
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt){
+        const img = document.getElementById('cropperImage');
+        img.src = evt.target.result;
+        openCrop();
+        if(cropper) cropper.destroy();
+        cropper = new Cropper(img, {aspectRatio:1, viewMode:1});
+    };
+    reader.readAsDataURL(file);
+});
+</script>
+@endpush
