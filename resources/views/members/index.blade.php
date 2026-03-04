@@ -225,8 +225,8 @@
 </div>
 @endsection
     <!-- cropping modal -->
-    <div id="cropModal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 hidden z-[9999]">
-        <div class="modal-content bg-white rounded-lg w-full max-w-2xl p-6 relative z-[10000]">
+    <div id="cropModal" class="fixed inset-0 bg-black bg-opacity-50 hidden" style="z-index: 99999">
+        <div class="bg-white rounded-lg w-full max-w-2xl p-6 relative" style="z-index: 100000; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)">
             <button class="absolute top-2 right-2 text-gray-500 text-2xl" onclick="closeCrop()">&times;</button>
             <h3 class="text-lg font-semibold text-deep-brown mb-4">Crop Profile Photo</h3>
             <p class="text-sm text-gray-600 mb-4">Drag or resize the crop area. You can move and zoom the image.</p>
@@ -350,16 +350,10 @@ let cropper;
 function openCrop(){ 
     const modal = document.getElementById('cropModal');
     modal.classList.remove('hidden');
-    modal.classList.add('active'); 
 }
 function closeCrop(){ 
     const modal = document.getElementById('cropModal');
-    modal.classList.add('closing');
-    modal.classList.remove('active');
-    setTimeout(() => {
-        modal.classList.add('hidden');
-        modal.classList.remove('closing');
-    }, 200);
+    modal.classList.add('hidden');
 }
 function applyCrop(){
     if(!cropper) return;
