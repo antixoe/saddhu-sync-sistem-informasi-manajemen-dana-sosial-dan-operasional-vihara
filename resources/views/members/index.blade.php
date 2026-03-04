@@ -262,51 +262,74 @@ function closeCrop(){
 }
 
 function applyCrop(){
-    if(!cropper) return;
-    const canvas = cropper.getCroppedCanvas({width:300, height:300});
-    const dataUrl = canvas.toDataURL('image/png');
-    
-    // Save to the modal form hidden input
-    document.getElementById('modalProfileImageData').value = dataUrl;
-    const preview = document.getElementById('modalProfileImagePreview');
-    preview.src = dataUrl;
-    preview.classList.remove('hidden');
-    closeCrop();
+    console.log('applyCrop called, cropper exists:', !!cropper);
+    if(!cropper) {
+        console.error('No cropper instance available');
+        return;
+    }
+    try {
+        const canvas = cropper.getCroppedCanvas({width:300, height:300});
+        const dataUrl = canvas.toDataURL('image/png');
+        
+        // Save to the modal form hidden input
+        document.getElementById('modalProfileImageData').value = dataUrl;
+        console.log('Saved cropped image data, length:', dataUrl.length);
+        
+        const preview = document.getElementById('modalProfileImagePreview');
+        preview.src = dataUrl;
+        preview.classList.remove('hidden');
+        console.log('Updated preview image');
+        
+        closeCrop();
+    } catch(e) {
+        console.error('Error during crop:', e);
+    }
 }
 
 document.getElementById('modalProfileImageInput').addEventListener('change', function(e){
     const file = e.target.files[0];
+    console.log('File selected:', file?.name, 'Size:', file?.size);
+    
     if(!file) return;
     const reader = new FileReader();
     reader.onload = function(evt){
+        console.log('Image loaded, data length:', evt.target.result.length);
+        
         const img = document.getElementById('cropperImage');
         img.src = evt.target.result;
-        openCrop();
-        
-        // Destroy old cropper if exists
-        if(cropper) cropper.destroy();
-        
-        // Initialize cropper with proper settings
-        setTimeout(() => {
-            cropper = new Cropper(img, {
-                aspectRatio: 1,
-                viewMode: 1,
-                autoCropArea: 1,
-                responsive: true,
-                restore: true,
-                guides: true,
-                center: true,
-                highlight: true,
-                cropBoxMovable: true,
-                cropBoxResizable: true,
-                toggleDragModeOnDblclick: true,
-                background: true,
-                modal: false,
-                ready: function() {
-                    console.log('Cropper ready');
-                }
-            });
-        }, 100);
+        img.onload = function() {
+            console.log('Image onload triggered, opening crop modal');
+            openCrop();
+            
+            // Destroy old cropper if exists
+            if(cropper) {
+                console.log('Destroying existing cropper');
+                cropper.destroy();
+            }
+            
+            // Initialize cropper with proper settings
+            setTimeout(() => {
+                console.log('Initializing cropper.js');
+                cropper = new Cropper(img, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    autoCropArea: 1,
+                    responsive: true,
+                    restore: true,
+                    guides: true,
+                    center: true,
+                    highlight: true,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                    toggleDragModeOnDblclick: true,
+                    background: true,
+                    modal: false,
+                    ready: function() {
+                        console.log('Cropper fully ready and initialized');
+                    }
+                });
+            }, 100);
+        };
     };
     reader.readAsDataURL(file);
 });
