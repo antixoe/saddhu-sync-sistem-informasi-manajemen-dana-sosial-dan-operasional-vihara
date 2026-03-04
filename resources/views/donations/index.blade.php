@@ -63,7 +63,7 @@
                             @endif
                         </td>
                         <td class="py-4 px-6 text-right">
-                            <button onclick="openDonationModal({{ $donation->id }})" class="text-saffron hover:text-rust text-sm font-medium">View</button>
+                            <a href="{{ route('donations.show', $donation) }}" class="text-saffron hover:text-rust text-sm font-medium">View</a>
                         </td>
                     </tr>
                 @empty
@@ -227,66 +227,5 @@ function filterByCategory(categoryId) {
 document.getElementById('is_regular').addEventListener('change', function() {
     document.getElementById('frequency-section').style.display = this.checked ? 'block' : 'none';
 });
-
-// Donation view modal
-function openDonationModal(donationId) {
-    const modal = document.getElementById('viewDonationModal');
-    const modal_content = document.getElementById('donationDetailsContent');
-    
-    // Fetch donation details
-    fetch(`/api/donations/${donationId}`)
-        .then(r => r.json())
-        .then(data => {
-            modal_content.innerHTML = `
-                <div class="space-y-4">
-                    <div>
-                        <h3 class="text-sm font-semibold text-gray-700">Donor</h3>
-                        <p class="text-deep-brown">${data.is_anonymous ? 'Anonymous' : (data.member?.user?.name || 'N/A')}</p>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-semibold text-gray-700">Category</h3>
-                        <p class="text-deep-brown">${data.fund_category?.name || 'N/A'}</p>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-semibold text-gray-700">Amount</h3>
-                        <p class="text-deep-brown font-bold">Rp${parseInt(data.amount).toLocaleString('id-ID')}</p>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-semibold text-gray-700">Method</h3>
-                        <p class="text-deep-brown">${data.donation_method}</p>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-semibold text-gray-700">Date</h3>
-                        <p class="text-deep-brown">${new Date(data.donated_at).toLocaleDateString()}</p>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-semibold text-gray-700">Status</h3>
-                        <p class="text-deep-brown">${data.verified_at ? '<span class="inline-block px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded">Verified</span>' : '<span class="inline-block px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-semibold rounded">Pending</span>'}</p>
-                    </div>
-                    ${data.notes ? `<div>
-                        <h3 class="text-sm font-semibold text-gray-700">Notes</h3>
-                        <p class="text-gray-600">${data.notes}</p>
-                    </div>` : ''}
-                </div>
-            `;
-        })
-        .catch(err => {
-            modal_content.innerHTML = '<p class="text-red-600">Error loading donation details</p>';
-            console.error(err);
-        });
-    
-    openModal('viewDonationModal');
-}
 </script>
-
-<!-- View Donation Modal -->
-<div id="viewDonationModal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 hidden">
-    <div class="modal-content bg-white rounded-lg w-11/12 max-w-lg p-8 relative">
-        <button class="absolute top-2 right-2 text-gray-500" onclick="closeModal('viewDonationModal')">&times;</button>
-        <h2 class="text-2xl font-semibold text-deep-brown mb-4">Donation Details</h2>
-        <div id="donationDetailsContent">
-            <p class="text-gray-600">Loading...</p>
-        </div>
-    </div>
-</div>
 @endsection

@@ -57,7 +57,7 @@
                             @endif
                         </td>
                         <td class="py-4 px-6 text-right">
-                            <button onclick="openMemberModal({{ $member->id }})" class="text-saffron hover:text-rust text-sm font-medium">View</button>
+                            <a href="{{ route('members.show', $member) }}" class="text-saffron hover:text-rust text-sm font-medium">View</a>
                         </td>
                     </tr>
                 @empty
@@ -240,17 +240,6 @@
         </div>
     </div>
 @push('scripts')
-<!-- View Member Modal -->
-<div id="viewMemberModal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 hidden">
-    <div class="modal-content bg-white rounded-lg w-11/12 max-w-lg p-8 relative">
-        <button class="absolute top-2 right-2 text-gray-500" onclick="closeModal('viewMemberModal')">&times;</button>
-        <h2 class="text-2xl font-semibold text-deep-brown mb-4">Member Details</h2>
-        <div id="memberDetailsContent">
-            <p class="text-gray-600">Loading...</p>
-        </div>
-    </div>
-</div>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" integrity="sha512-WXoSL2lrKOSIDW4vLmWWBRs30rwu4iZBsFyVgkankJav7CipMcYvyCQohyadjDtWxhZu5LSEEwzlCn4+n+D5+w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 let memberMap = null;

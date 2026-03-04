@@ -109,20 +109,6 @@ Route::middleware(['auth'])->group(function () {
     // Petty Cash
     Route::resource('petty-cash', PettyCashController::class);
 
-    // API endpoints for modal views
-    Route::get('/api/donations/{donation}', function (\App\Models\Donation $donation) {
-        return $donation->load('member.user', 'fundCategory')->toJson();
-    });
-    Route::get('/api/inventory/{item}', function (\App\Models\InventoryItem $item) {
-        return $item->toJson();
-    });
-    Route::get('/api/members/{member}', function (\App\Models\Member $member) {
-        return $member->load('user')->toJson();
-    });
-    Route::get('/api/rituals/{ritual}', function (\App\Models\Ritual $ritual) {
-        return $ritual->toJson();
-    });
-
     // Reports
     Route::get('/reports/donations', [ReportController::class, 'donations'])->name('reports.donations');
     Route::get('/reports/expenses', [ReportController::class, 'expenses'])->name('reports.expenses');
