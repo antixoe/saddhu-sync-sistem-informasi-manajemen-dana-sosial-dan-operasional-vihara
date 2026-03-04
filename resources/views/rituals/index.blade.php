@@ -16,10 +16,11 @@
                 <option value="{{ $t }}" {{ request('type') == $t ? 'selected' : '' }}>{{ ucfirst($t) }}</option>
             @endforeach
         </select>
-        <form method="GET" action="{{ route('rituals.index') }}" class="flex items-center">
+        <form method="GET" action="{{ route('rituals.index') }}" class="flex items-center gap-0">
             <input type="hidden" name="type" value="{{ request('type') }}" />
             <input type="text" name="q" placeholder="Search rituals..." value="{{ request('q') }}" class="px-3 py-2 border border-gray-300 rounded-l-md text-sm" />
-            <button type="submit" class="px-3 py-2 bg-saffron text-white rounded-r-md text-sm"><i class="fas fa-search"></i></button>
+            <button type="submit" class="px-3 py-2 bg-saffron text-white text-sm border-l border-orange-400"><i class="fas fa-search"></i></button>
+            <a href="{{ route('rituals.index') }}" class="px-3 py-2 bg-gray-400 text-white rounded-r-md text-sm hover:bg-gray-500"><i class="fas fa-times"></i></a>
         </form>
     </div>
     <button onclick="openModal('createRitualModal')" class="btn-spiritual px-6 py-2 text-white rounded-lg font-medium flex items-center space-x-2">
