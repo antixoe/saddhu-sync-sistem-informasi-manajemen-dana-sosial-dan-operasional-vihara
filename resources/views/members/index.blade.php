@@ -225,25 +225,91 @@
 </div>
 @endsection
     <!-- cropping modal -->
-    <div id="cropModal" class="fixed inset-0 bg-black bg-opacity-50 hidden" style="z-index: 99999">
-        <div class="bg-white rounded-lg w-full max-w-2xl p-6 relative" style="z-index: 100000; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)">
-            <button class="absolute top-2 right-2 text-gray-500 text-2xl" onclick="closeCrop()">&times;</button>
-            <h3 class="text-lg font-semibold text-deep-brown mb-4">Crop Profile Photo</h3>
-            <p class="text-sm text-gray-600 mb-4">Drag or resize the crop area. You can move and zoom the image.</p>
-            <div class="overflow-auto bg-gray-100 rounded" style="max-height: 500px;">
-                <img id="cropperImage" src="" class="max-w-full" />
+    <div id="cropModal" class="fixed inset-0 bg-black bg-opacity-75 hidden flex items-center justify-center" style="z-index: 99999; display: none;">
+        <div class="bg-white rounded-lg p-6 relative" style="z-index: 100000; width: 90%; max-width: 600px; max-height: 85vh; overflow-y: auto;">
+            <button class="absolute top-3 right-3 text-gray-600 hover:text-gray-900 text-2xl font-bold" onclick="closeCrop()">&times;</button>
+            <h3 class="text-lg font-semibold text-deep-brown mb-2">Crop Profile Photo</h3>
+            <p class="text-xs text-gray-600 mb-4">Drag or resize the crop box. You can move and zoom the image using the guides.</p>
+            <div class="bg-gray-200 rounded flex items-center justify-center" style="height: 400px; overflow: hidden;">
+                <img id="cropperImage" src="" class="max-w-full max-h-full" style="display: block;" />
             </div>
-            <div class="mt-6 flex justify-end space-x-3">
-                <button type="button" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50" onclick="closeCrop()">Cancel</button>
-                <button type="button" class="btn-spiritual px-6 py-2 text-white rounded-lg font-medium" onclick="applyCrop()">Crop & Save</button>
+            <div class="mt-6 flex justify-end gap-3">
+                <button type="button" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50" onclick="closeCrop()">Cancel</button>
+                <button type="button" class="px-4 py-2 bg-saffron text-white rounded-lg font-medium hover:bg-orange-600" onclick="applyCrop()">Crop & Save</button>
             </div>
         </div>
     </div>
 @push('scripts')
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" integrity="sha512-WXoSL2lrKOSIDW4vLmWWBRs30rwu4iZBsFyVgkankJav7CipMcYvyCQohyadjDtWxhZu5LSEEwzlCn4+n+D5+w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js" integrity="sha512-+/4ODD9CFmQ2wXYSPTDaJCW+U8URq4nqZNcYlVv+bU4VPkCnHQysdOkqD3UBqUGvmV9pUz+Jq3dLdFi78GX4mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
+let cropper;
 let memberMap = null;
 let mapInitialized = false;
+
+function openCrop(){ 
+    const modal = document.getElementById('cropModal');
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
+}
+
+function closeCrop(){ 
+    const modal = document.getElementById('cropModal');
+    modal.classList.add('hidden');
+    if(cropper) {
+        cropper.destroy();
+        cropper = null;
+    }
+}
+
+function applyCrop(){
+    if(!cropper) return;
+    const canvas = cropper.getCroppedCanvas({width:300, height:300});
+    const dataUrl = canvas.toDataURL('image/png');
+    
+    // Save to the modal form hidden input
+    document.getElementById('modalProfileImageData').value = dataUrl;
+    const preview = document.getElementById('modalProfileImagePreview');
+    preview.src = dataUrl;
+    preview.classList.remove('hidden');
+    closeCrop();
+}
+
+document.getElementById('modalProfileImageInput').addEventListener('change', function(e){
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt){
+        const img = document.getElementById('cropperImage');
+        img.src = evt.target.result;
+        openCrop();
+        
+        // Destroy old cropper if exists
+        if(cropper) cropper.destroy();
+        
+        // Initialize cropper with proper settings
+        setTimeout(() => {
+            cropper = new Cropper(img, {
+                aspectRatio: 1,
+                viewMode: 1,
+                autoCropArea: 1,
+                responsive: true,
+                restore: true,
+                guides: true,
+                center: true,
+                highlight: true,
+                cropBoxMovable: true,
+                cropBoxResizable: true,
+                toggleDragModeOnDblclick: true,
+                background: true,
+                modal: false,
+                ready: function() {
+                    console.log('Cropper ready');
+                }
+            });
+        }, 100);
+    };
+    reader.readAsDataURL(file);
+});
 
 function initMemberMap() {
     if (!window.L) {
@@ -344,78 +410,8 @@ window.afterModalOpen = function(id) {
     }
 };
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js" integrity="sha512-+/4ODD9CFmQ2wXYSPTDaJCW+U8URq4nqZNcYlVv+bU4VPkCnHQysdOkqD3UBqUGvmV9pUz+Jq3dLdFi78GX4mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script>
-let cropper;
-function openCrop(){ 
-    const modal = document.getElementById('cropModal');
-    modal.classList.remove('hidden');
-}
-function closeCrop(){ 
-    const modal = document.getElementById('cropModal');
-    modal.classList.add('hidden');
-}
-function applyCrop(){
-    if(!cropper) return;
-    const canvas = cropper.getCroppedCanvas({width:300,height:300});
-    const dataUrl = canvas.toDataURL('image/png');
-    document.getElementById('profileImageData').value = dataUrl;
-    const preview = document.getElementById('profileImagePreview');
-    preview.src = dataUrl;
-    preview.classList.remove('hidden');
-    closeCrop();
-}
-
-document.getElementById('modalProfileImageInput').addEventListener('change', function(e){
-    const file = e.target.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = function(evt){
-        const img = document.getElementById('cropperImage');
-        img.src = evt.target.result;
-        openCrop();
-        if(cropper) cropper.destroy();
-        cropper = new Cropper(img, {
-            aspectRatio: 1,
-            viewMode: 1,
-            autoCropArea: 1,
-            responsive: true,
-            restore: true,
-            guides: true,
-            center: true,
-            highlight: true,
-            cropBoxMovable: true,
-            cropBoxResizable: true,
-            toggleDragModeOnDblclick: true,
-            background: true,
-            modal: true,
-            data: {
-                width: 300,
-                height: 300
-            },
-            ready: function() {
-                cropper.setCanvasData({width: 300, height: 300});
-            }
-        });
-    };
-    reader.readAsDataURL(file);
-});
-
-// Update applyCrop to save to the correct modal hidden input
-const originalApplyCrop = applyCrop;
-function applyCrop(){
-    if(!cropper) return;
-    const canvas = cropper.getCroppedCanvas({width:300,height:300});
-    const dataUrl = canvas.toDataURL('image/png');
-    document.getElementById('modalProfileImageData').value = dataUrl;
-    const preview = document.getElementById('modalProfileImagePreview');
-    preview.src = dataUrl;
-    preview.classList.remove('hidden');
-    closeCrop();
-}
-
-// Member view modal
-function openMemberModal(memberId) {
+// Member view modal - kept for reference but not used as we reverted modals
+// function openMemberModal(memberId) {
     const modal_content = document.getElementById('memberDetailsContent');
     
     fetch(`/api/members/${memberId}`)
