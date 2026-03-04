@@ -69,7 +69,7 @@
                             @endif
                         </td>
                         <td class="py-4 px-6 text-right">
-                            <a href="{{ route('inventory.show', $item) }}" class="text-saffron hover:text-rust text-sm font-medium">View</a>
+                            <button onclick="openInventoryModal({{ $item->id }})" class="text-saffron hover:text-rust text-sm font-medium">View</button>
                         </td>
                     </tr>
                 @empty
@@ -217,5 +217,64 @@ function filterByCategory(categoryValue) {
     }
     window.location = url.toString();
 }
+
+// Inventory view modal
+function openInventoryModal(itemId) {
+    const modal_content = document.getElementById('inventoryDetailsContent');
+    
+    fetch(`/api/inventory/${itemId}`)
+        .then(r => r.json())
+        .then(data => {
+            modal_content.innerHTML = `
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-700">Item Name</h3>
+                        <p class="text-deep-brown">${data.name}</p>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-700">Category</h3>
+                        <p class="text-deep-brown">${data.category}</p>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-700">Description</h3>
+                        <p class="text-gray-600">${data.description || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-700">Quantity</h3>
+                        <p class="text-deep-brown font-bold">${data.quantity} ${data.unit}</p>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-700">Unit Value</h3>
+                        <p class="text-deep-brown">Rp${data.purchase_price ? parseInt(data.purchase_price).toLocaleString('id-ID') : 'N/A'}</p>
+                    </div>
+                    ${data.reorder_level ? `<div>
+                        <h3 class="text-sm font-semibold text-gray-700">Reorder Level</h3>
+                        <p class="text-deep-brown">${data.reorder_level}</p>
+                    </div>` : ''}
+                    ${data.notes ? `<div>
+                        <h3 class="text-sm font-semibold text-gray-700">Notes</h3>
+                        <p class="text-gray-600">${data.notes}</p>
+                    </div>` : ''}
+                </div>
+            `;
+        })
+        .catch(err => {
+            modal_content.innerHTML = '<p class="text-red-600">Error loading inventory details</p>';
+            console.error(err);
+        });
+    
+    openModal('viewInventoryModal');
+}
 </script>
+
+<!-- View Inventory Modal -->
+<div id="viewInventoryModal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 hidden">
+    <div class="modal-content bg-white rounded-lg w-11/12 max-w-lg p-8 relative">
+        <button class="absolute top-2 right-2 text-gray-500" onclick="closeModal('viewInventoryModal')">&times;</button>
+        <h2 class="text-2xl font-semibold text-deep-brown mb-4">Inventory Item Details</h2>
+        <div id="inventoryDetailsContent">
+            <p class="text-gray-600">Loading...</p>
+        </div>
+    </div>
+</div>
 @endsection

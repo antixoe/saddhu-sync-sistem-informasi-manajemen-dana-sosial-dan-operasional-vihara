@@ -57,7 +57,7 @@
                             @endif
                         </td>
                         <td class="py-4 px-6 text-right">
-                            <a href="{{ route('members.show', $member) }}" class="text-saffron hover:text-rust text-sm font-medium">View</a>
+                            <button onclick="openMemberModal({{ $member->id }})" class="text-saffron hover:text-rust text-sm font-medium">View</button>
                         </td>
                     </tr>
                 @empty
@@ -240,6 +240,17 @@
         </div>
     </div>
 @push('scripts')
+<!-- View Member Modal -->
+<div id="viewMemberModal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 hidden">
+    <div class="modal-content bg-white rounded-lg w-11/12 max-w-lg p-8 relative">
+        <button class="absolute top-2 right-2 text-gray-500" onclick="closeModal('viewMemberModal')">&times;</button>
+        <h2 class="text-2xl font-semibold text-deep-brown mb-4">Member Details</h2>
+        <div id="memberDetailsContent">
+            <p class="text-gray-600">Loading...</p>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" integrity="sha512-WXoSL2lrKOSIDW4vLmWWBRs30rwu4iZBsFyVgkankJav7CipMcYvyCQohyadjDtWxhZu5LSEEwzlCn4+n+D5+w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 let memberMap = null;
@@ -406,6 +417,57 @@ function applyCrop(){
     preview.src = dataUrl;
     preview.classList.remove('hidden');
     closeCrop();
+}
+
+// Member view modal
+function openMemberModal(memberId) {
+    const modal_content = document.getElementById('memberDetailsContent');
+    
+    fetch(`/api/members/${memberId}`)
+        .then(r => r.json())
+        .then(data => {
+            let html = `
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-700">Name</h3>
+                        <p class="text-deep-brown">${data.user?.name || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-700">Email</h3>
+                        <p class="text-deep-brown">${data.user?.email || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-700">Member ID</h3>
+                        <p class="text-deep-brown">${data.member_id || 'N/A'}</p>
+                    </div>
+            `;
+            if(data.phone) {
+                html += `<div>
+                    <h3 class="text-sm font-semibold text-gray-700">Phone</h3>
+                    <p class="text-deep-brown">${data.phone}</p>
+                </div>`;
+            }
+            if(data.birth_date) {
+                html += `<div>
+                    <h3 class="text-sm font-semibold text-gray-700">Birth Date</h3>
+                    <p class="text-deep-brown">${new Date(data.birth_date).toLocaleDateString()}</p>
+                </div>`;
+            }
+            if(data.address) {
+                html += `<div>
+                    <h3 class="text-sm font-semibold text-gray-700">Address</h3>
+                    <p class="text-gray-600">${data.address}</p>
+                </div>`;
+            }
+            html += '</div>';
+            modal_content.innerHTML = html;
+        })
+        .catch(err => {
+            modal_content.innerHTML = '<p class="text-red-600">Error loading member details</p>';
+            console.error(err);
+        });
+    
+    openModal('viewMemberModal');
 }
 </script>
 @endpush

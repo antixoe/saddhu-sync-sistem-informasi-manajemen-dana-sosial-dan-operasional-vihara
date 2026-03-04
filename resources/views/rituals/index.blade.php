@@ -55,7 +55,7 @@
                     </div>
                 </div>
                 <div class="flex flex-col space-y-2">
-                    <a href="{{ route('rituals.show', $ritual) }}" class="text-saffron hover:text-rust font-medium text-sm">View Details</a>
+                    <button onclick="openRitualModal({{ $ritual->id }})" class=\"text-saffron hover:text-rust font-medium text-sm\">View Details</button>
                     <a href="{{ route('rituals.edit', $ritual) }}" class="text-saffron hover:text-rust font-medium text-sm">Edit</a>
                 </div>
             </div>
@@ -206,5 +206,77 @@ function filterByType(typeValue) {
     }
     window.location = url.toString();
 }
+
+// Ritual view modal
+function openRitualModal(ritualId) {
+    const modal_content = document.getElementById('ritualDetailsContent');
+    
+    fetch(`/api/rituals/${ritualId}`)
+        .then(r => r.json())
+        .then(data => {
+            let html = `
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-700">Title</h3>
+                        <p class="text-deep-brown">${data.title}</p>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-700">Type</h3>
+                        <p class="text-deep-brown">${data.type}</p>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-700">Description</h3>
+                        <p class="text-gray-600">${data.description || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-700">Date & Time</h3>
+                        <p class="text-deep-brown">${new Date(data.start_time).toLocaleString()}</p>
+                    </div>
+            `;
+            if(data.location) {
+                html += `<div>
+                    <h3 class="text-sm font-semibold text-gray-700">Location</h3>
+                    <p class="text-deep-brown">${data.location}</p>
+                </div>`;
+            }
+            if(data.capacity) {
+                html += `<div>
+                    <h3 class="text-sm font-semibold text-gray-700">Capacity</h3>
+                    <p class="text-deep-brown">${data.capacity}</p>
+                </div>`;
+            }
+            if(data.is_recurring) {
+                html += `<div>
+                    <h3 class="text-sm font-semibold text-gray-700">Recurring</h3>
+                    <p class="text-deep-brown">Yes - ${data.recurrence_pattern}</p>
+                </div>`;
+            }
+            if(data.special_notes) {
+                html += `<div>
+                    <h3 class="text-sm font-semibold text-gray-700">Special Notes</h3>
+                    <p class="text-gray-600">${data.special_notes}</p>
+                </div>`;
+            }
+            html += '</div>';
+            modal_content.innerHTML = html;
+        })
+        .catch(err => {
+            modal_content.innerHTML = '<p class="text-red-600">Error loading ritual details</p>';
+            console.error(err);
+        });
+    
+    openModal('viewRitualModal');
+}
 </script>
+
+<!-- View Ritual Modal -->
+<div id="viewRitualModal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 hidden">
+    <div class="modal-content bg-white rounded-lg w-11/12 max-w-lg p-8 relative">
+        <button class="absolute top-2 right-2 text-gray-500" onclick="closeModal('viewRitualModal')">&times;</button>
+        <h2 class="text-2xl font-semibold text-deep-brown mb-4">Ritual Details</h2>
+        <div id="ritualDetailsContent">
+            <p class="text-gray-600">Loading...</p>
+        </div>
+    </div>
+</div>
 @endsection
