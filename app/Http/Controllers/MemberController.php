@@ -121,7 +121,11 @@ class MemberController extends Controller
 
     public function edit(Member $member): View
     {
-        return view('members.edit', ['member' => $member]);
+        $roles = \App\Models\Role::pluck('name');
+        return view('members.edit', [
+            'member' => $member,
+            'roles' => $roles,
+        ]);
     }
 
     public function update(Request $request, Member $member): RedirectResponse
