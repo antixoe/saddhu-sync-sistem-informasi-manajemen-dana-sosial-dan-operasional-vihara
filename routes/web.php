@@ -66,6 +66,14 @@ Route::post('/register', function (\Illuminate\Http\Request $request) {
         'role' => 'member',
     ]);
 
+    // Also create a Member record so user appears on members page
+    \App\Models\Member::create([
+        'user_id' => $user->id,
+        'member_id' => 'MBR-' . date('YmdHis'),
+        'join_date' => now(),
+        'qr_code_token' => \Illuminate\Support\Str::random(20),
+    ]);
+
     \Illuminate\Support\Facades\Auth::login($user);
     return redirect()->route('dashboard');
 })->middleware('guest')->name('register.post');

@@ -6,6 +6,7 @@
 
 @push('head')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" integrity="sha512-+S0Hf2YQWGWpZJm7x46HWQHIokX1CPG3cs5FqZZ+cRcYfKzvVfMZsql+RfVU07uSjBxPxz3yZnbzUYSvM1z4Ow==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" integrity="sha512-sXcvNLcKzK0EYgGnGLhvC0hpBDRDxzKvgR8Tj5JCH0Y8S3hNLNRbHB8C3QHSvl7m5JxLQzXxEaHnGj3d3x8eA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 @endpush
 
 @section('content')
@@ -102,9 +103,10 @@
 
                 <!-- Coordinates and map picker -->
                 <div class="md:col-span-2">
-                    <div id="map" class="w-full h-64 rounded-lg mb-2"></div>
-                    <input type="hidden" name="latitude" id="latitude" value="{{ old('latitude') }}">
-                    <input type="hidden" name="longitude" id="longitude" value="{{ old('longitude') }}">
+                    <p class="text-sm text-gray-600 mb-2"><i class="fas fa-map-pin text-saffron"></i> Click on the map to select member location</p>
+                    <div id="map" class="w-full h-64 rounded-lg mb-2 border border-gray-300"></div>
+                    <input type="hidden" name="latitude" id="latitude" value="{{ old('latitude', '-6.200000') }}">
+                    <input type="hidden" name="longitude" id="longitude" value="{{ old('longitude', '106.816666') }}">
                 </div>
 
                 <!-- City -->
@@ -168,23 +170,48 @@
 function initMemberMap() {
     const latInput = document.getElementById('latitude');
     const lngInput = document.getElementById('longitude');
+    const addressInput = document.getElementById('address');
     let lat = parseFloat(latInput.value) || -6.200000;
     let lng = parseFloat(lngInput.value) || 106.816666;
-    const map = new google.maps.Map(document.getElementById('map'), { center: {lat, lng}, zoom: 13 });
-    const marker = new google.maps.Marker({ position: {lat, lng}, map: map, draggable: true });
-    marker.addListener('dragend', function(e) {
-        latInput.value = e.latLng.lat();
-        lngInput.value = e.latLng.lng();
-        const geocoder = new google.maps.Geocoder();
-        geocoder.geocode({ location: e.latLng }, function(results, status) {
-            if (status === 'OK' && results[0]) {
-                document.getElementById('address').value = results[0].formatted_address;
-            }
-        });
+    
+    const map = L.map('map').setView([lat, lng], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(map);
+    
+    let marker = L.marker([lat, lng], {draggable: true}).addTo(map);
+    
+    function updateMarker(newLat, newLng) {
+        latInput.value = newLat;
+        lngInput.value = newLng;
+        marker.setLatLng([newLat, newLng]);
+        // reverse geocode using nominatim
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${newLat}&lon=${newLng}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.address) {
+                    addressInput.value = data.display_name || '';
+                }
+            })
+            .catch(e => console.error('Geocode error:', e));
+    }
+    
+    marker.on('dragend', function(e) {
+        const pos = e.target.getLatLng();
+        updateMarker(pos.lat, pos.lng);
+    });
+    
+    map.on('click', function(e) {
+        updateMarker(e.latlng.lat, e.latlng.lng);
     });
 }
 </script>
+@if(config('services.google.maps_key'))
 <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_key') }}&callback=initMemberMap&libraries=places"></script>
+@else
+<!-- google maps key missing: please set GOOGLE_MAPS_KEY in .env -->
+@endif
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js" integrity="sha512-+/4ODD9CFmQ2wXYSPTDaJCW+U8URq4nqZNcYlVv+bU4VPkCnHQysdOkqD3UBqUGvmV9pUz+Jq3dLdFi78GX4mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 let cropper;

@@ -6,6 +6,7 @@
 
 @push('head')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" integrity="sha512-+S0Hf2YQWGWpZJm7x46HWQHIokX1CPG3cs5FqZZ+cRcYfKzvVfMZsql+RfVU07uSjBxPxz3yZnbzUYSvM1z4Ow==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" integrity="sha512-sXcvNLcKzK0EYgGnGLhvC0hpBDRDxzKvgR8Tj5JCH0Y8S3hNLNRbHB8C3QHSvl7m5JxLQzXxEaHnGj3d3x8eA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 @endpush
 
 @section('content')
@@ -93,9 +94,10 @@
 
                 <!-- Coordinates and map picker -->
                 <div class="md:col-span-2">
-                    <div id="map" class="w-full h-64 rounded-lg mb-2"></div>
-                    <input type="hidden" name="latitude" id="latitude" value="{{ old('latitude', $member->latitude) }}">
-                    <input type="hidden" name="longitude" id="longitude" value="{{ old('longitude', $member->longitude) }}">
+                    <p class="text-sm text-gray-600 mb-2"><i class="fas fa-map-pin text-saffron"></i> Click on the map to select member location</p>
+                    <div id="map" class="w-full h-64 rounded-lg mb-2 border border-gray-300"></div>
+                    <input type="hidden" name="latitude" id="latitude" value="{{ old('latitude', $member->latitude ?? '-6.200000') }}">
+                    <input type="hidden" name="longitude" id="longitude" value="{{ old('longitude', $member->longitude ?? '106.816666') }}">
                 </div>
 
                 <!-- City -->
@@ -188,7 +190,11 @@ function initMemberMap() {
     });
 }
 </script>
+@if(config('services.google.maps_key'))
 <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_key') }}&callback=initMemberMap&libraries=places"></script>
+@else
+<!-- google maps key missing: please set GOOGLE_MAPS_KEY in .env -->
+@endif
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js" integrity="sha512-+/4ODD9CFmQ2wXYSPTDaJCW+U8URq4nqZNcYlVv+bU4VPkCnHQysdOkqD3UBqUGvmV9pUz+Jq3dLdFi78GX4mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 let cropper;

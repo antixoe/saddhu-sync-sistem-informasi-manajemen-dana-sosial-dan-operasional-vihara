@@ -334,6 +334,22 @@
                 }, { once: true });
             }
         }
+
+        // password visibility toggle (used by login modal)
+        function togglePassword(inputId, iconId) {
+            const field = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (field) {
+                if (field.type === 'password') {
+                    field.type = 'text';
+                    if (icon) icon.classList.replace('fa-eye','fa-eye-slash');
+                } else {
+                    field.type = 'password';
+                    if (icon) icon.classList.replace('fa-eye-slash','fa-eye');
+                }
+            }
+        }
+
         document.addEventListener('click', function(e) {
             if (e.target.classList.contains('bg-opacity-50')) {
                 e.target.classList.add('hidden');

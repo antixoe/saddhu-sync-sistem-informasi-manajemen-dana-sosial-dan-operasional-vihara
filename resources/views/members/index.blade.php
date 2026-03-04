@@ -6,6 +6,7 @@
 
 @push('head')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" integrity="sha512-+S0Hf2YQWGWpZJm7x46HWQHIokX1CPG3cs5FqZZ+cRcYfKzvVfMZsql+RfVU07uSjBxPxz3yZnbzUYSvM1z4Ow==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" integrity="sha512-sXcvNLcKzK0EYgGnGLhvC0hpBDRDxzKvgR8Tj5JCH0Y8S3hNLNRbHB8C3QHSvl7m5JxLQzXxEaHnGj3d3x8eA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 @endpush
 
 @section('content')
@@ -74,20 +75,20 @@
 </div>
 
 <!-- create member modal -->
-<div id="createMemberModal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 hidden">
-    <div class="modal-content bg-white rounded-lg w-11/12 max-w-3xl p-8 relative overflow-auto max-h-[90vh]">
-        <button class="absolute top-2 right-2 text-gray-500" onclick="closeModal('createMemberModal')">&times;</button>
-        <h2 class="text-2xl font-semibold text-deep-brown mb-4">New Member Registration</h2>
+<div id="createMemberModal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="modal-content bg-white rounded-lg w-11/12 max-w-3xl p-8 relative overflow-y-auto max-h-[90vh]">
+        <button class="absolute top-4 right-4 text-gray-500 text-2xl hover:text-gray-700" onclick="closeModal('createMemberModal')">&times;</button>
+        <h2 class="text-2xl font-semibold text-deep-brown mb-6">New Member Registration</h2>
         <form action="{{ route('members.store') }}" method="POST" class="space-y-6">
             @csrf
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Name -->
                 <div class="md:col-span-2">
-                    <label for="name" class="block text-sm font-semibold text-deep-brown mb-2">
+                    <label for="modal_name" class="block text-sm font-semibold text-deep-brown mb-2">
                         <i class="fas fa-user text-saffron"></i> Full Name *
                     </label>
-                    <input type="text" name="name" id="name" required
+                    <input type="text" name="name" id="modal_name" required
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-saffron focus:ring-2 focus:ring-saffron/20"
                         value="{{ old('name') }}">
                     @error('name')
@@ -95,12 +96,25 @@
                     @enderror
                 </div>
 
+                <!-- Email -->
+                <div class="md:col-span-2">
+                    <label for="modal_email" class="block text-sm font-semibold text-deep-brown mb-2">
+                        <i class="fas fa-envelope text-saffron"></i> Email *
+                    </label>
+                    <input type="email" name="email" id="modal_email" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-saffron focus:ring-2 focus:ring-saffron/20"
+                        value="{{ old('email') }}">
+                    @error('email')
+                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <!-- Role -->
                 <div class="md:col-span-2">
-                    <label for="role" class="block text-sm font-semibold text-deep-brown mb-2">
+                    <label for="modal_role" class="block text-sm font-semibold text-deep-brown mb-2">
                         <i class="fas fa-user-tag text-saffron"></i> Role *
                     </label>
-                    <select name="role" id="role" required
+                    <select name="role" id="modal_role" required
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-saffron focus:ring-2 focus:ring-saffron/20">
                         <option value="">-- Select Role --</option>
                         @foreach($roles as $r)
@@ -112,102 +126,95 @@
                     @enderror
                 </div>
 
-                <!-- Profile Image -->
-                <div class="md:col-span-2">
-                    <label class="block text-sm font-semibold text-deep-brown mb-2">
-                        <i class="fas fa-camera text-saffron"></i> Profile Photo
-                    </label>
-                    <input type="file" accept="image/*" id="profileImageInput" class="mb-2" />
-                    <input type="hidden" name="profile_image" id="profileImageData" value="{{ old('profile_image') }}" />
-                    <div id="profilePreview" class="w-32 h-32 rounded-full bg-gray-100 overflow-hidden">
-                        <img id="profileImagePreview" src="" class="w-full h-full object-cover hidden" />
-                    </div>
-                </div>
-
-                <!-- Email -->
-                <div class="md:col-span-2">
-                    <label for="email" class="block text-sm font-semibold text-deep-brown mb-2">
-                        <i class="fas fa-envelope text-saffron"></i> Email *
-                    </label>
-                    <input type="email" name="email" id="email" required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-saffron focus:ring-2 focus:ring-saffron/20"
-                        value="{{ old('email') }}">
-                    @error('email')
-                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-
                 <!-- Phone -->
                 <div>
-                    <label for="phone" class="block text-sm font-semibold text-deep-brown mb-2">
+                    <label for="modal_phone" class="block text-sm font-semibold text-deep-brown mb-2">
                         <i class="fas fa-phone text-saffron"></i> Phone
                     </label>
-                    <input type="tel" name="phone" id="phone"
+                    <input type="tel" name="phone" id="modal_phone"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-saffron focus:ring-2 focus:ring-saffron/20"
                         value="{{ old('phone') }}">
                 </div>
 
                 <!-- Birth Date -->
                 <div>
-                    <label for="birth_date" class="block text-sm font-semibold text-deep-brown mb-2">
+                    <label for="modal_birth_date" class="block text-sm font-semibold text-deep-brown mb-2">
                         <i class="fas fa-birthday-cake text-saffron"></i> Birth Date
                     </label>
-                    <input type="date" name="birth_date" id="birth_date"
+                    <input type="date" name="birth_date" id="modal_birth_date"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-saffron focus:ring-2 focus:ring-saffron/20"
                         value="{{ old('birth_date') }}">
                 </div>
 
+                <!-- Profile Image -->
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-semibold text-deep-brown mb-2">
+                        <i class="fas fa-camera text-saffron"></i> Profile Photo
+                    </label>
+                    <div class="flex items-center space-x-4">
+                        <input type="file" accept="image/*" id="modalProfileImageInput" class="flex-1" />
+                        <div id="modalProfilePreview" class="w-24 h-24 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
+                            <img id="modalProfileImagePreview" src="" class="w-full h-full object-cover hidden" />
+                        </div>
+                    </div>
+                    <input type="hidden" name="profile_image" id="modalProfileImageData" value="{{ old('profile_image') }}" />
+                </div>
+
                 <!-- Address -->
                 <div class="md:col-span-2">
-                    <label for="address" class="block text-sm font-semibold text-deep-brown mb-2">
+                    <label for="modal_address" class="block text-sm font-semibold text-deep-brown mb-2">
                         <i class="fas fa-map-marker-alt text-saffron"></i> Address
                     </label>
-                    <input type="text" name="address" id="address"
+                    <input type="text" name="address" id="modal_address"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-saffron focus:ring-2 focus:ring-saffron/20"
+                        placeholder="Click on map to select location"
                         value="{{ old('address') }}">
                 </div>
 
-                <!-- Coordinates and map picker -->
+                <!-- Map Section -->
                 <div class="md:col-span-2">
-                    <div id="map" class="w-full h-64 rounded-lg mb-2"></div>
-                    <input type="hidden" name="latitude" id="latitude" value="{{ old('latitude') }}">
-                    <input type="hidden" name="longitude" id="longitude" value="{{ old('longitude') }}">
+                    <label class="block text-sm font-semibold text-deep-brown mb-2">
+                        <i class="fas fa-map text-saffron"></i> Location (Click or drag marker to select)
+                    </label>
+                    <div id="modalMap" class="w-full h-80 rounded-lg border-2 border-gray-300 bg-gray-50" style="position: relative;"></div>
+                    <input type="hidden" name="latitude" id="modal_latitude" value="{{ old('latitude', '-6.200000') }}">
+                    <input type="hidden" name="longitude" id="modal_longitude" value="{{ old('longitude', '106.816666') }}">
                 </div>
 
                 <!-- City -->
                 <div>
-                    <label for="city" class="block text-sm font-semibold text-deep-brown mb-2">
+                    <label for="modal_city" class="block text-sm font-semibold text-deep-brown mb-2">
                         <i class="fas fa-city text-saffron"></i> City
                     </label>
-                    <input type="text" name="city" id="city"
+                    <input type="text" name="city" id="modal_city"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-saffron focus:ring-2 focus:ring-saffron/20"
                         value="{{ old('city') }}">
                 </div>
 
                 <!-- Province -->
                 <div>
-                    <label for="province" class="block text-sm font-semibold text-deep-brown mb-2">
+                    <label for="modal_province" class="block text-sm font-semibold text-deep-brown mb-2">
                         <i class="fas fa-map text-saffron"></i> Province
                     </label>
-                    <input type="text" name="province" id="province"
+                    <input type="text" name="province" id="modal_province"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-saffron focus:ring-2 focus:ring-saffron/20"
                         value="{{ old('province') }}">
                 </div>
 
                 <!-- Postal Code -->
                 <div>
-                    <label for="postal_code" class="block text-sm font-semibold text-deep-brown mb-2">
+                    <label for="modal_postal_code" class="block text-sm font-semibold text-deep-brown mb-2">
                         <i class="fas fa-mail-bulk text-saffron"></i> Postal Code
                     </label>
-                    <input type="text" name="postal_code" id="postal_code"
+                    <input type="text" name="postal_code" id="modal_postal_code"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-saffron focus:ring-2 focus:ring-saffron/20"
                         value="{{ old('postal_code') }}">
                 </div>
             </div>
 
             <div class="flex space-x-4 pt-6 border-t border-gray-200">
-                <button type="submit" class="btn-spiritual px-6 py-2 text-white rounded-lg font-medium">
-                    <i class="fas fa-save mr-2"></i> Register Member
+                <button type="submit" class="btn-spiritual px-6 py-2 text-white rounded-lg font-medium flex items-center space-x-2 hover:shadow-lg">
+                    <i class="fas fa-save"></i> <span>Register Member</span>
                 </button>
                 <button type="button" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50" onclick="closeModal('createMemberModal')">
                     Cancel
@@ -218,41 +225,125 @@
 </div>
 @endsection
     <!-- cropping modal -->
-    <div id="cropModal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 hidden">
-        <div class="modal-content bg-white rounded-lg w-full max-w-lg p-6 relative">
-            <button class="absolute top-2 right-2 text-gray-500" onclick="closeCrop()">&times;</button>
-            <h3 class="text-lg font-semibold text-deep-brown mb-2">Crop Profile Photo</h3>
-            <div class="overflow-auto">
+    <div id="cropModal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 hidden z-[9999]">
+        <div class="modal-content bg-white rounded-lg w-full max-w-2xl p-6 relative z-[10000]">
+            <button class="absolute top-2 right-2 text-gray-500 text-2xl" onclick="closeCrop()">&times;</button>
+            <h3 class="text-lg font-semibold text-deep-brown mb-4">Crop Profile Photo</h3>
+            <p class="text-sm text-gray-600 mb-4">Drag or resize the crop area. You can move and zoom the image.</p>
+            <div class="overflow-auto bg-gray-100 rounded" style="max-height: 500px;">
                 <img id="cropperImage" src="" class="max-w-full" />
             </div>
-            <div class="mt-4 flex justify-end space-x-2">
-                <button type="button" class="btn-spiritual px-4 py-2 text-white rounded" onclick="applyCrop()">Crop</button>
-                <button type="button" class="px-4 py-2 border rounded" onclick="closeCrop()">Cancel</button>
+            <div class="mt-6 flex justify-end space-x-3">
+                <button type="button" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50" onclick="closeCrop()">Cancel</button>
+                <button type="button" class="btn-spiritual px-6 py-2 text-white rounded-lg font-medium" onclick="applyCrop()">Crop & Save</button>
             </div>
         </div>
     </div>
 @push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" integrity="sha512-WXoSL2lrKOSIDW4vLmWWBRs30rwu4iZBsFyVgkankJav7CipMcYvyCQohyadjDtWxhZu5LSEEwzlCn4+n+D5+w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
+let memberMap = null;
+let mapInitialized = false;
+
 function initMemberMap() {
-    const latInput = document.getElementById('latitude');
-    const lngInput = document.getElementById('longitude');
-    let lat = parseFloat(latInput.value) || -6.200000;
-    let lng = parseFloat(lngInput.value) || 106.816666;
-    const map = new google.maps.Map(document.getElementById('map'), { center: {lat, lng}, zoom: 13 });
-    const marker = new google.maps.Marker({ position: {lat, lng}, map: map, draggable: true });
-    marker.addListener('dragend', function(e) {
-        latInput.value = e.latLng.lat();
-        lngInput.value = e.latLng.lng();
-        const geocoder = new google.maps.Geocoder();
-        geocoder.geocode({ location: e.latLng }, function(results, status) {
-            if (status === 'OK' && results[0]) {
-                document.getElementById('address').value = results[0].formatted_address;
-            }
+    if (!window.L) {
+        console.warn('Leaflet not loaded yet');
+        return;
+    }
+    if (mapInitialized) return;
+    mapInitialized = true;
+    
+    try {
+        if (memberMap) {
+            memberMap.remove();
+            memberMap = null;
+        }
+        
+        const latInput = document.getElementById('modal_latitude');
+        const lngInput = document.getElementById('modal_longitude');
+        const addressInput = document.getElementById('modal_address');
+        const mapContainer = document.getElementById('modalMap');
+        
+        if (!mapContainer) {
+            console.warn('Map container not found');
+            return;
+        }
+        
+        let lat = parseFloat(latInput?.value) || -6.200000;
+        let lng = parseFloat(lngInput?.value) || 106.816666;
+        
+        // Create map
+        memberMap = L.map('modalMap', {
+            center: [lat, lng],
+            zoom: 13,
+            preferCanvas: true
         });
-    });
+        
+        // Add tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(memberMap);
+        
+        // Create marker
+        let marker = L.marker([lat, lng], {
+            draggable: true,
+            icon: L.icon({
+                iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                iconSize: [25, 41],
+                shadowSize: [41, 41],
+                iconAnchor: [12, 41],
+                shadowAnchor: [12, 41],
+                popupAnchor: [1, -34]
+            })
+        }).addTo(memberMap);
+        
+        function updateMarker(newLat, newLng) {
+            latInput.value = newLat.toFixed(6);
+            lngInput.value = newLng.toFixed(6);
+            marker.setLatLng([newLat, newLng]);
+            
+            // Reverse geocode
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${newLat}&lon=${newLng}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data && data.display_name) {
+                        addressInput.value = data.display_name;
+                    }
+                })
+                .catch(e => console.log('Geocoding error:', e));
+        }
+        
+        marker.on('dragend', function(e) {
+            const pos = e.target.getLatLng();
+            updateMarker(pos.lat, pos.lng);
+        });
+        
+        memberMap.on('click', function(e) {
+            updateMarker(e.latlng.lat, e.latlng.lng);
+        });
+        
+        // Force redraw
+        setTimeout(() => {
+            if (memberMap) memberMap.invalidateSize();
+        }, 100);
+        
+    } catch(error) {
+        console.error('Map initialization error:', error);
+        mapInitialized = false;
+    }
 }
+
+window.afterModalOpen = function(id) {
+    if (id === 'createMemberModal') {
+        mapInitialized = false;
+        setTimeout(() => {
+            initMemberMap();
+        }, 350);
+    }
+};
 </script>
-<script async defer src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_key') }}&callback=initMemberMap&libraries=places"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js" integrity="sha512-+/4ODD9CFmQ2wXYSPTDaJCW+U8URq4nqZNcYlVv+bU4VPkCnHQysdOkqD3UBqUGvmV9pUz+Jq3dLdFi78GX4mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 let cropper;
@@ -269,7 +360,7 @@ function applyCrop(){
     closeCrop();
 }
 
-document.getElementById('profileImageInput').addEventListener('change', function(e){
+document.getElementById('modalProfileImageInput').addEventListener('change', function(e){
     const file = e.target.files[0];
     if(!file) return;
     const reader = new FileReader();
@@ -278,9 +369,43 @@ document.getElementById('profileImageInput').addEventListener('change', function
         img.src = evt.target.result;
         openCrop();
         if(cropper) cropper.destroy();
-        cropper = new Cropper(img, {aspectRatio:1, viewMode:1});
+        cropper = new Cropper(img, {
+            aspectRatio: 1,
+            viewMode: 1,
+            autoCropArea: 1,
+            responsive: true,
+            restore: true,
+            guides: true,
+            center: true,
+            highlight: true,
+            cropBoxMovable: true,
+            cropBoxResizable: true,
+            toggleDragModeOnDblclick: true,
+            background: true,
+            modal: true,
+            data: {
+                width: 300,
+                height: 300
+            },
+            ready: function() {
+                cropper.setCanvasData({width: 300, height: 300});
+            }
+        });
     };
     reader.readAsDataURL(file);
 });
+
+// Update applyCrop to save to the correct modal hidden input
+const originalApplyCrop = applyCrop;
+function applyCrop(){
+    if(!cropper) return;
+    const canvas = cropper.getCroppedCanvas({width:300,height:300});
+    const dataUrl = canvas.toDataURL('image/png');
+    document.getElementById('modalProfileImageData').value = dataUrl;
+    const preview = document.getElementById('modalProfileImagePreview');
+    preview.src = dataUrl;
+    preview.classList.remove('hidden');
+    closeCrop();
+}
 </script>
 @endpush

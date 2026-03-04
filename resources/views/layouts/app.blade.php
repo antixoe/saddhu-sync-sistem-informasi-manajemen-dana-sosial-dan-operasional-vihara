@@ -331,6 +331,10 @@
             el.classList.remove('hidden');
             // add active for layouts that animate on .active
             el.classList.add('active');
+            // custom hook for pages that need to react when a modal appears
+            if (window.afterModalOpen) {
+                try { window.afterModalOpen(id); } catch(e){ console.error('afterModalOpen error', e); }
+            }
         }
         function closeModal(id) {
             const el = document.getElementById(id);
