@@ -16,7 +16,12 @@ class RitualController extends Controller
     public function index(Request $request): View
     {
         $q = $request->input('q');
+        $type = $request->input('type');
         $query = Ritual::orderBy('start_time');
+
+        if ($type) {
+            $query->where('type', $type);
+        }
 
         if ($q) {
             $query->where(function ($sub) use ($q) {
@@ -27,8 +32,14 @@ class RitualController extends Controller
         }
 
         $rituals = $query->paginate(20)->withQueryString();
+        
+        // Get all unique ritual types
+        $types = Ritual::distinct()->pluck('type')->sort()->filter()->values();
 
-        return view('rituals.index', ['rituals' => $rituals]);
+        return view('rituals.index', [
+            'rituals' => $rituals,
+            'types' => $types,
+        ]);
     }
 
     public function create(): View

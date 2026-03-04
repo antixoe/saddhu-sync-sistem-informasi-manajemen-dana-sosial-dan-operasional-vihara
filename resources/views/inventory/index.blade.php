@@ -18,10 +18,19 @@
             </div>
         @endif
     </div>
-            <form method="GET" action="{{ route('inventory.index') }}" class="flex items-center space-x-2">
-                <input type="text" name="q" placeholder="Search inventory..." value="{{ request('q') }}" class="px-3 py-2 border border-gray-300 rounded-l-md text-sm" />
-                <button type="submit" class="px-3 py-2 bg-saffron text-white rounded-r-md text-sm"><i class="fas fa-search"></i></button>
-            </form>
+            <div class="flex items-center space-x-3">
+                <select class="px-4 py-2 border border-gray-300 rounded-lg text-sm" onchange="filterByCategory(this.value)">
+                    <option value="">All Categories</option>
+                    @foreach($categories as $cat)
+                        <option value="{{ $cat }}" {{ request('category') == $cat ? 'selected' : '' }}>{{ $cat }}</option>
+                    @endforeach
+                </select>
+                <form method="GET" action="{{ route('inventory.index') }}" class="flex items-center space-x-2">
+                    <input type="hidden" name="category" value="{{ request('category') }}" />
+                    <input type="text" name="q" placeholder="Search inventory..." value="{{ request('q') }}" class="px-3 py-2 border border-gray-300 rounded-l-md text-sm" />
+                    <button type="submit" class="px-3 py-2 bg-saffron text-white rounded-r-md text-sm"><i class="fas fa-search"></i></button>
+                </form>
+            </div>
         <button onclick="openModal('createInventoryModal')" class="btn-spiritual px-6 py-2 text-white rounded-lg font-medium flex items-center space-x-2">
             <i class="fas fa-plus"></i>
             <span>Add Item</span>
@@ -197,4 +206,16 @@
     </div>
 </div>
 </div>
+
+<script>
+function filterByCategory(categoryValue) {
+    let url = new URL(window.location);
+    if (categoryValue) {
+        url.searchParams.set('category', categoryValue);
+    } else {
+        url.searchParams.delete('category');
+    }
+    window.location = url.toString();
+}
+</script>
 @endsection

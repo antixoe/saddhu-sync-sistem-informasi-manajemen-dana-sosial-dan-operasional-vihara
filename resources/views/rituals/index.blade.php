@@ -10,7 +10,14 @@
         <p class="text-gray-600">Total Events: <span class="font-bold text-deep-brown">{{ $rituals->total() }}</span></p>
     </div>
     <div class="flex items-center space-x-4">
+        <select class="px-4 py-2 border border-gray-300 rounded-lg text-sm" onchange="filterByType(this.value)">
+            <option value="">All Types</option>
+            @foreach($types as $t)
+                <option value="{{ $t }}" {{ request('type') == $t ? 'selected' : '' }}>{{ ucfirst($t) }}</option>
+            @endforeach
+        </select>
         <form method="GET" action="{{ route('rituals.index') }}" class="flex items-center">
+            <input type="hidden" name="type" value="{{ request('type') }}" />
             <input type="text" name="q" placeholder="Search rituals..." value="{{ request('q') }}" class="px-3 py-2 border border-gray-300 rounded-l-md text-sm" />
             <button type="submit" class="px-3 py-2 bg-saffron text-white rounded-r-md text-sm"><i class="fas fa-search"></i></button>
         </form>
@@ -188,4 +195,16 @@
     </div>
 </div>
 </div>
+
+<script>
+function filterByType(typeValue) {
+    let url = new URL(window.location);
+    if (typeValue) {
+        url.searchParams.set('type', typeValue);
+    } else {
+        url.searchParams.delete('type');
+    }
+    window.location = url.toString();
+}
+</script>
 @endsection

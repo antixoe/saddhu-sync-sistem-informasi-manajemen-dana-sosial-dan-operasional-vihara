@@ -13,7 +13,12 @@ class InventoryController extends Controller
     public function index(Request $request): View
     {
         $q = $request->input('q');
+        $category = $request->input('category');
         $query = InventoryItem::latest();
+
+        if ($category) {
+            $query->where('category', $category);
+        }
 
         if ($q) {
             $query->where(function ($sub) use ($q) {
@@ -27,10 +32,14 @@ class InventoryController extends Controller
         $lowStockItems = InventoryItem::whereNotNull('reorder_level')
             ->whereRaw('quantity <= reorder_level')
             ->count();
+        
+        // Get all unique categories
+        $categories = InventoryItem::distinct()->pluck('category')->sort()->filter()->values();
 
         return view('inventory.index', [
             'items' => $items,
             'lowStockCount' => $lowStockItems,
+            'categories' => $categories,
         ]);
     }
 

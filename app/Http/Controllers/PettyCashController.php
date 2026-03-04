@@ -13,7 +13,12 @@ class PettyCashController extends Controller
     public function index(Request $request): View
     {
         $q = $request->input('q');
+        $category = $request->input('category');
         $query = PettyCash::with('user')->latest('transaction_date');
+
+        if ($category) {
+            $query->where('category', $category);
+        }
 
         if ($q) {
             $query->where(function ($sub) use ($q) {
@@ -30,11 +35,15 @@ class PettyCashController extends Controller
         $totalMonth = PettyCash::whereMonth('transaction_date', now()->month)
             ->whereYear('transaction_date', now()->year)
             ->sum('amount');
+        
+        // Get all unique categories
+        $categories = PettyCash::distinct()->pluck('category')->sort()->filter()->values();
 
         return view('petty-cash.index', [
             'transactions' => $transactions,
             'totalToday' => $totalToday,
             'totalMonth' => $totalMonth,
+            'categories' => $categories,
         ]);
     }
 
