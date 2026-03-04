@@ -347,8 +347,20 @@ window.afterModalOpen = function(id) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js" integrity="sha512-+/4ODD9CFmQ2wXYSPTDaJCW+U8URq4nqZNcYlVv+bU4VPkCnHQysdOkqD3UBqUGvmV9pUz+Jq3dLdFi78GX4mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 let cropper;
-function openCrop(){ document.getElementById('cropModal').classList.add('active'); }
-function closeCrop(){ document.getElementById('cropModal').classList.remove('active'); }
+function openCrop(){ 
+    const modal = document.getElementById('cropModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('active'); 
+}
+function closeCrop(){ 
+    const modal = document.getElementById('cropModal');
+    modal.classList.add('closing');
+    modal.classList.remove('active');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('closing');
+    }, 200);
+}
 function applyCrop(){
     if(!cropper) return;
     const canvas = cropper.getCroppedCanvas({width:300,height:300});
