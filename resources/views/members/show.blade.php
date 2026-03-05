@@ -71,6 +71,13 @@
                 <a href="{{ route('members.edit', $member) }}" class="btn-spiritual px-4 py-2 text-white rounded-lg text-sm">
                     <i class="fas fa-edit"></i> Edit
                 </a>
+                <form action="{{ route('members.destroy', $member) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this member? This action cannot be undone.');" class="inline">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700">
+                        <i class="fas fa-trash-alt"></i> Delete
+                    </button>
+                </form>
                 @if($member->is_active)
                     <form action="{{ route('members.deactivate', $member) }}" method="POST" class="inline">
                         @csrf
