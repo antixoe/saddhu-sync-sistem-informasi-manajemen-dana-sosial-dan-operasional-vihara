@@ -14,6 +14,10 @@ class SettingsController extends Controller
             'google_maps_key',
             'default_locale',
             'support_email',
+            // donation configuration for public page
+            'donation_qr_code',          // URL or base64 data for QR image
+            'donation_bank_details',     // plain text bank account information
+            'donation_virtual_accounts', // additional virtual payment details
         ];
 
         $settings = Setting::whereIn('key', $keys)->get()->pluck('value', 'key')->toArray();
@@ -36,6 +40,9 @@ class SettingsController extends Controller
             'google_maps_key' => 'nullable|string|max:255',
             'default_locale' => 'nullable|string|max:10',
             'support_email' => 'nullable|email|max:255',
+            'donation_qr_code' => 'nullable|string',
+            'donation_bank_details' => 'nullable|string',
+            'donation_virtual_accounts' => 'nullable|string',
         ]);
 
         foreach ($validated as $k => $v) {

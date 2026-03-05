@@ -19,6 +19,11 @@ Route::get('/', function () {
     return view('welcome-new');
 })->name('home');
 
+// donation page for general visitors
+Route::get('/donate', [DonationController::class, 'publicCreate'])->name('donate');
+Route::post('/donate', [DonationController::class, 'publicStore'])->name('donate.store');
+Route::get('/donate/thankyou', [DonationController::class, 'thankyou'])->name('donate.thankyou');
+
 // Authentication routes
 Route::get('/login', function () {
     return view('auth.login');

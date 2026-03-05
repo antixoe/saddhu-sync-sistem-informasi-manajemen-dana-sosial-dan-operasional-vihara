@@ -55,9 +55,16 @@
         <div class="card-spiritual p-6 mb-6">
             <h3 class="text-lg font-semibold text-deep-brown mb-4">Actions</h3>
             <div class="space-y-2">
-                <a href="{{ route('inventory.edit', $item) }}" class="block w-full px-4 py-2 btn-spiritual text-white rounded-lg text-center text-sm font-medium">
+                <a href="<?php echo e(url('inventory/'.$item->id.'/edit')); ?>" class="block w-full px-4 py-2 btn-spiritual text-white rounded-lg text-center text-sm font-medium">
                     <i class="fas fa-edit"></i> Edit
                 </a>
+                <form action="{{ url('inventory/'.$item->id) }}" method="POST" onsubmit="return confirm('Delete this item?');" class="mt-2">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="block w-full px-4 py-2 bg-red-600 text-white rounded-lg text-center text-sm font-medium">
+                        <i class="fas fa-trash-alt"></i> Delete
+                    </button>
+                </form>
                 <button onclick="openAdjustForm()" class="block w-full px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-center text-sm font-medium hover:bg-blue-200">
                     <i class="fas fa-plus"></i> Adjust Stock
                 </button>
@@ -66,7 +73,7 @@
 
         <div id="adjustForm" class="card-spiritual p-6 hidden">
             <h3 class="text-lg font-semibold text-deep-brown mb-4">Adjust Stock</h3>
-            <form action="{{ route('inventory.adjust-stock', $item) }}" method="POST" class="space-y-4">
+            <form action="{{ url('inventory/'.$item->id.'/adjust-stock') }}" method="POST" class="space-y-4">
                 @csrf
                 <div>
                     <label class="block text-sm font-semibold text-deep-brown mb-2">Quantity Change</label>

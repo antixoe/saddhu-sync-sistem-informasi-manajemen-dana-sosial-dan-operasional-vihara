@@ -7,6 +7,7 @@ use App\Models\Member;
 use App\Models\FundCategory;
 use App\Models\MeritHistory;
 use App\Models\ActivityLog;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -98,6 +99,49 @@ class DonationController extends Controller
         return view('donations.show', ['donation' => $donation]);
     }
 
+    /**
+     * Public donation form accessible without authentication.
+     */
+    public function publicCreate(): View
+    {
+        $fundCategories = FundCategory::all();
+        $qrCode = Setting::getValue('donation_qr_code');
+        $bankDetails = Setting::getValue('donation_bank_details');
+        $virtualAccounts = Setting::getValue('donation_virtual_accounts');
+
+        return view('donations.public', compact('fundCategories', 'qrCode', 'bankDetails', 'virtualAccounts'));
+    }
+
+    /**
+     * Handle submission from the public donation page.
+     */
+    public function publicStore(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'fund_category_id' => 'required|exists:fund_categories,id',
+            'amount' => 'required|numeric|min:1',
+            'donation_method' => 'required|string',
+            'transaction_id' => 'nullable|string|unique:donations',
+            'notes' => 'nullable|string',
+        ]);
+
+        $validated['donated_at'] = now();
+        // treat all public submissions as anonymous by default
+        $validated['is_anonymous'] = true;
+
+        $donation = Donation::create($validated);
+
+        ActivityLog::log('created', 'Donation', $donation->id,
+            "Public donation of Rp" . number_format((float) $donation->amount));
+
+        return redirect()->route('donate.thankyou');
+    }
+
+    public function thankyou(): View
+    {
+        return view('donations.thankyou');
+    }
+
     public function edit(Donation $donation): View
     {
         $members = Member::where('is_active', true)->get();
@@ -145,5 +189,12 @@ class DonationController extends Controller
         ActivityLog::log('updated', 'Donation', $donation->id, "Receipt sent to member");
 
         return back()->with('success', 'Receipt sent to member!');
+    }
+
+    public function destroy(Donation $donation): RedirectResponse
+    {
+        ActivityLog::log('deleted', 'Donation', $donation->id, "Donation of Rp" . number_format((float) $donation->amount) . " deleted");
+        $donation->delete();
+        return redirect()->route('donations.index')->with('success', 'Donation removed successfully!');
     }
 }

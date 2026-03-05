@@ -64,7 +64,13 @@
                             @endif
                         </td>
                         <td class="py-4 px-6 text-right">
-                            <a href="{{ route('donations.show', $donation) }}" class="text-saffron hover:text-rust text-sm font-medium">View</a>
+                            <a href="{{ route('donations.show', $donation) }}" class="text-saffron hover:text-rust text-sm font-medium mr-3">View</a>
+                            <a href="{{ route('donations.edit', $donation) }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium mr-3">Edit</a>
+                            <form action="{{ route('donations.destroy', $donation) }}" method="POST" class="inline-block" onsubmit="return confirm('Delete this donation?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium">Delete</button>
+                            </form>
                         </td>
                     </tr>
                 @empty
@@ -151,6 +157,7 @@
                         <option value="cash" {{ old('donation_method') == 'cash' ? 'selected' : '' }}>Cash</option>
                         <option value="qris" {{ old('donation_method') == 'qris' ? 'selected' : '' }}>QRIS</option>
                         <option value="bank_transfer" {{ old('donation_method') == 'bank_transfer' ? 'selected' : '' }}>Bank Transfer</option>
+                        <option value="virtual" {{ old('donation_method') == 'virtual' ? 'selected' : '' }}>Virtual Payment</option>
                         <option value="check" {{ old('donation_method') == 'check' ? 'selected' : '' }}>Check</option>
                     </select>
                     @error('donation_method')

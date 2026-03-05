@@ -194,4 +194,18 @@ class MemberController extends Controller
 
         return back()->with('success', 'Member activated!');
     }
+
+    public function destroy(Member $member): RedirectResponse
+    {
+        // delete associated user which will cascade the member record as well
+        $name = $member->user->name ?? 'Unknown';
+        ActivityLog::log('deleted', 'Member', $member->id, "Member {$name} deleted");
+        if ($member->user) {
+            $member->user->delete();
+        } else {
+            $member->delete();
+        }
+
+        return redirect()->route('members.index')->with('success', 'Member deleted successfully!');
+    }
 }

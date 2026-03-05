@@ -59,12 +59,16 @@
             background: #faf9f7;
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            width: 400px;
+            /* make modals wider if needed */
+            width: 90%;
+            max-width: 600px;
+            /* allow tall content to scroll */
+            max-height: 90vh;
+            overflow-y: auto;
             transform: translateY(-20px) scale(0.9);
             opacity: 0;
             transition: transform 0.25s ease-out, opacity 0.25s ease-out;
             position: relative;
-            overflow: hidden;
         }
         .modal-content::before {
             content: '';
@@ -124,6 +128,9 @@
                     <i class="fas fa-sign-in-alt mr-2"></i> Login
                 </button>
                 <a href="{{ route('register') }}" class="inline-block ml-4 px-8 py-3 border-2 border-saffron text-saffron font-bold rounded-lg hover:bg-saffron hover:text-white transition">Register</a>
+                <button onclick="openDonateModal()" class="inline-block ml-4 px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition">
+                    <i class="fas fa-hand-holding-heart mr-2"></i> Donate
+                </button>
             </div>
 
             <!-- Features Grid -->
@@ -311,6 +318,31 @@
             <div class="text-center mt-2 space-y-2">
                 <a href="{{ route('register') }}" class="block w-full px-4 py-2 bg-gradient-to-r from-saffron to-gold text-white rounded-lg hover:shadow-lg transition btn-animated" onclick="closeModal('loginModal')">Create account</a>
                 <p class="text-xs text-gray-500">Already have one? <a href="#" onclick="openModal('loginModal'); return false;" class="text-saffron hover:underline">Sign in</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- donate modal - requires login -->
+    <div id="donateModal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 hidden">
+        <div class="modal-content bg-white rounded-lg w-96 p-8 relative">
+            <button class="absolute top-2 right-2 text-gray-500" onclick="closeModal('donateModal')">&times;</button>
+            <div class="text-center">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-hand-holding-heart text-3xl text-green-600"></i>
+                </div>
+                <h2 class="text-2xl font-semibold text-deep-brown mb-2">Support Our Temple</h2>
+                <p class="text-gray-600 mb-6">Please login or register to make a donation. Your generosity helps us continue our spiritual and social activities.</p>
+                <div class="space-y-3">
+                    <button onclick="closeDonateModalAndOpen('loginModal')" class="w-full px-6 py-3 bg-gradient-to-r from-saffron to-gold text-white font-bold rounded-lg hover:shadow-lg transition btn-animated">
+                        <i class="fas fa-sign-in-alt mr-2"></i> Login
+                    </button>
+                    <a href="{{ route('register') }}" onclick="closeModal('donateModal')" class="block w-full px-6 py-3 border-2 border-saffron text-saffron font-bold rounded-lg hover:bg-saffron hover:text-white transition text-center">
+                        <i class="fas fa-user-plus mr-2"></i> Register
+                    </a>
+                    <button onclick="closeModal('donateModal')" class="w-full px-6 py-2 text-gray-500 text-sm hover:text-gray-700">
+                        Maybe later
+                    </button>
+                </div>
             </div>
         </div>
     </div>

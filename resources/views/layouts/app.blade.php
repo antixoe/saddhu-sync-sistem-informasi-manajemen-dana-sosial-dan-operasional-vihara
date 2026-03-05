@@ -41,6 +41,18 @@
         .cropper-container img {
             max-width: 100%;
         }
+        .cropper-modal,
+        .cropper-canvas,
+        .cropper-drag-box,
+        .cropper-crop-box,
+        .cropper-face,
+        .cropper-line,
+        .cropper-point {
+            pointer-events: none;
+        }
+        .cropper-container {
+            pointer-events: auto;
+        }
         .sidebar {
             background: linear-gradient(135deg, #3E2723 0%, #5d4037 100%);
             box-shadow: 2px 0 10px rgba(0,0,0,0.1);
@@ -106,12 +118,14 @@
             background: #faf9f7;
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            width: 400px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
             transform: translateY(-20px) scale(0.9);
             opacity: 0;
             transition: transform 0.25s ease-out, opacity 0.25s ease-out;
             position: relative;
-            overflow: hidden;
         }
         .modal-content::before {
             content: '';
@@ -158,7 +172,8 @@
         }
     </script>
     <div class="flex h-screen bg-gray-100">
-        <!-- Sidebar -->
+        <!-- Sidebar (only for authenticated users) -->
+        @if(auth()->check())
         <aside class="sidebar w-64 text-white flex flex-col">
             <div class="p-6 border-b border-amber-600/30">
                 <div class="text-center mb-2">
@@ -243,6 +258,7 @@
                 @endauth
             </div>
         </aside>
+        @endif
 
         <!-- login modal for layout -->
         <div id="loginModal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 hidden">

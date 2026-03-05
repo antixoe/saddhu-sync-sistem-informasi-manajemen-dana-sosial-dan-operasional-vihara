@@ -70,7 +70,13 @@
                             @endif
                         </td>
                         <td class="py-4 px-6 text-right">
-                            <a href="{{ route('inventory.show', $item) }}" class="text-saffron hover:text-rust text-sm font-medium">View</a>
+                            <a href="{{ route('inventory.show', ['inventory' => $item->id]) }}" class="text-saffron hover:text-rust text-sm font-medium mr-3">View</a>
+                            <a href="{{ route('inventory.edit', ['inventory' => $item->id]) }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium mr-3">Edit</a>
+                            <form action="{{ route('inventory.destroy', ['inventory' => $item->id]) }}" method="POST" class="inline-block" onsubmit="return confirm('Delete this item?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium">Delete</button>
+                            </form>
                         </td>
                     </tr>
                 @empty

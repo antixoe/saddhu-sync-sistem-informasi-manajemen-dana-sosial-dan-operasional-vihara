@@ -6,7 +6,6 @@
 
 @push('head')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" integrity="sha512-+S0Hf2YQWGWpZJm7x46HWQHIokX1CPG3cs5FqZZ+cRcYfKzvVfMZsql+RfVU07uSjBxPxz3yZnbzUYSvM1z4Ow==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" integrity="sha512-sXcvNLcKzK0EYgGnGLhvC0hpBDRDxzKvgR8Tj5JCH0Y8S3hNLNRbHB8C3QHSvl7m5JxLQzXxEaHnGj3d3x8eA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 @endpush
 
 @section('content')
@@ -92,13 +91,6 @@
                         value="{{ old('address', $member->address) }}">
                 </div>
 
-                <!-- Coordinates and map picker -->
-                <div class="md:col-span-2">
-                    <p class="text-sm text-gray-600 mb-2"><i class="fas fa-map-pin text-saffron"></i> Click on the map to select member location</p>
-                    <div id="map" class="w-full h-64 rounded-lg mb-2 border border-gray-300"></div>
-                    <input type="hidden" name="latitude" id="latitude" value="{{ old('latitude', $member->latitude ?? '-6.200000') }}">
-                    <input type="hidden" name="longitude" id="longitude" value="{{ old('longitude', $member->longitude ?? '106.816666') }}">
-                </div>
 
                 <!-- City -->
                 <div>
@@ -153,16 +145,17 @@
 </div>
 
     <!-- cropping modal -->
-    <div id="cropModal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 hidden">
-        <div class="modal-content bg-white rounded-lg w-full max-w-lg p-6 relative">
-            <button class="absolute top-2 right-2 text-gray-500" onclick="closeCrop()">&times;</button>
+    <div id="cropModal" class="fixed inset-0 bg-black bg-opacity-75 hidden flex items-center justify-center" style="z-index: 99999; display: none;">
+        <div class="bg-white rounded-lg p-6 relative" style="z-index: 100000; width: 90%; max-width: 600px; max-height: 85vh; overflow-y: auto;">
+            <button class="absolute top-3 right-3 text-gray-600 hover:text-gray-900 text-2xl font-bold" onclick="closeCrop()" style="z-index: 100001;">&times;</button>
             <h3 class="text-lg font-semibold text-deep-brown mb-2">Crop Profile Photo</h3>
-            <div class="overflow-auto">
-                <img id="cropperImage" src="" class="max-w-full" />
+            <p class="text-xs text-gray-600 mb-4">Drag or resize the crop box. You can move and zoom the image using the guides.</p>
+            <div class="bg-gray-200 rounded flex items-center justify-center" style="height: 400px; overflow: hidden; position: relative;">
+                <img id="cropperImage" src="" class="max-w-full max-h-full" style="display: block;" />
             </div>
-            <div class="mt-4 flex justify-end space-x-2">
-                <button type="button" class="btn-spiritual px-4 py-2 text-white rounded" onclick="applyCrop()">Crop</button>
-                <button type="button" class="px-4 py-2 border rounded" onclick="closeCrop()">Cancel</button>
+            <div class="mt-6 flex justify-end gap-3" style="z-index: 100001; position: relative;">
+                <button type="button" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50" onclick="closeCrop()">Cancel</button>
+                <button type="button" class="px-4 py-2 bg-saffron text-white rounded-lg font-medium hover:bg-orange-600" onclick="applyCrop()">Crop & Save</button>
             </div>
         </div>
     </div>
@@ -170,36 +163,22 @@
 @endsection
 
 @push('scripts')
-<script>
-function initMemberMap() {
-    const latInput = document.getElementById('latitude');
-    const lngInput = document.getElementById('longitude');
-    let lat = parseFloat(latInput.value) || -6.200000;
-    let lng = parseFloat(lngInput.value) || 106.816666;
-    const map = new google.maps.Map(document.getElementById('map'), { center: {lat, lng}, zoom: 13 });
-    const marker = new google.maps.Marker({ position: {lat, lng}, map: map, draggable: true });
-    marker.addListener('dragend', function(e) {
-        latInput.value = e.latLng.lat();
-        lngInput.value = e.latLng.lng();
-        const geocoder = new google.maps.Geocoder();
-        geocoder.geocode({ location: e.latLng }, function(results, status) {
-            if (status === 'OK' && results[0]) {
-                document.getElementById('address').value = results[0].formatted_address;
-            }
-        });
-    });
-}
-</script>
-@if(config('services.google.maps_key'))
-<script async defer src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_key') }}&callback=initMemberMap&libraries=places"></script>
-@else
-<!-- google maps key missing: please set GOOGLE_MAPS_KEY in .env -->
-@endif
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js" integrity="sha512-+/4ODD9CFmQ2wXYSPTDaJCW+U8URq4nqZNcYlVv+bU4VPkCnHQysdOkqD3UBqUGvmV9pUz+Jq3dLdFi78GX4mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 let cropper;
-function openCrop(){ document.getElementById('cropModal').classList.add('active'); }
-function closeCrop(){ document.getElementById('cropModal').classList.remove('active'); }
+function openCrop(){
+    const modal = document.getElementById('cropModal');
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
+}
+function closeCrop(){
+    const modal = document.getElementById('cropModal');
+    modal.classList.add('hidden');
+    if(cropper) {
+        cropper.destroy();
+        cropper = null;
+    }
+}
 function applyCrop(){
     if(!cropper) return;
     const canvas = cropper.getCroppedCanvas({width:300,height:300});
@@ -218,9 +197,11 @@ document.getElementById('profileImageInput').addEventListener('change', function
     reader.onload = function(evt){
         const img = document.getElementById('cropperImage');
         img.src = evt.target.result;
-        openCrop();
-        if(cropper) cropper.destroy();
-        cropper = new Cropper(img, {aspectRatio:1, viewMode:1});
+        img.onload = function(){
+            openCrop();
+            if(cropper) cropper.destroy();
+            cropper = new Cropper(img, {aspectRatio:1, viewMode:1, guides:true, highlight:true, background:true});
+        };
     };
     reader.readAsDataURL(file);
 });

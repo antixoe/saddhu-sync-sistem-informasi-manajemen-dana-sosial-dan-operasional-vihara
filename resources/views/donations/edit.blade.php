@@ -47,6 +47,7 @@
                         <option value="cash" {{ $donation->donation_method == 'cash' ? 'selected' : '' }}>Cash</option>
                         <option value="qris" {{ $donation->donation_method == 'qris' ? 'selected' : '' }}>QRIS</option>
                         <option value="bank_transfer" {{ $donation->donation_method == 'bank_transfer' ? 'selected' : '' }}>Bank Transfer</option>
+                        <option value="virtual" {{ $donation->donation_method == 'virtual' ? 'selected' : '' }}>Virtual Payment</option>
                         <option value="check" {{ $donation->donation_method == 'check' ? 'selected' : '' }}>Check</option>
                     </select>
                 </div>

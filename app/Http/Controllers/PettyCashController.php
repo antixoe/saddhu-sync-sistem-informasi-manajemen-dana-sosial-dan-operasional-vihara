@@ -79,6 +79,11 @@ class PettyCashController extends Controller
         return view('petty-cash.edit', ['transaction' => $pettyCash]);
     }
 
+    public function show(PettyCash $pettyCash): View
+    {
+        return view('petty-cash.show', ['transaction' => $pettyCash]);
+    }
+
     public function update(Request $request, PettyCash $pettyCash): RedirectResponse
     {
         $validated = $request->validate([

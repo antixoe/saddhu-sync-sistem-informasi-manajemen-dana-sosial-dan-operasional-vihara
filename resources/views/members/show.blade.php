@@ -54,14 +54,6 @@
                     {{ $member->address ?? '-' }}<br>
                     {{ $member->city ?? '' }} {{ $member->province ?? '' }} {{ $member->postal_code ?? '' }}
                 </p>
-                @if($member->latitude && $member->longitude)
-                    <div class="mt-4">
-                        <iframe
-                            width="100%" height="200" frameborder="0" style="border:0"
-                            src="https://www.google.com/maps/embed/v1/view?key={{ config('services.google.maps_key') }}&center={{ $member->latitude }},{{ $member->longitude }}&zoom=15" allowfullscreen>
-                        </iframe>
-                    </div>
-                @endif
             </div>
 
             <div class="mt-6 flex space-x-4">
@@ -156,4 +148,7 @@
 <div class="mt-8">
     {{ $merits->links() }}
 </div>
+
+
 @endsection
+

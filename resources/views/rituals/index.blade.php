@@ -58,6 +58,11 @@
                 <div class="flex flex-col space-y-2">
                     <a href="{{ route('rituals.show', $ritual) }}" class="text-saffron hover:text-rust font-medium text-sm">View Details</a>
                     <a href="{{ route('rituals.edit', $ritual) }}" class="text-saffron hover:text-rust font-medium text-sm">Edit</a>
+                    <form action="{{ route('rituals.destroy', $ritual) }}" method="POST" onsubmit="return confirm('Delete this ritual/event?');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="text-red-600 hover:text-red-800 font-medium text-sm">Delete</button>
+                    </form>
                 </div>
             </div>
         </div>

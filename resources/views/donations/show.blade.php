@@ -67,6 +67,13 @@
                 <a href="{{ route('donations.edit', $donation) }}" class="block w-full px-4 py-2 btn-spiritual text-white rounded-lg text-center text-sm font-medium">
                     <i class="fas fa-edit"></i> Edit
                 </a>
+                <form action="{{ route('donations.destroy', $donation) }}" method="POST" onsubmit="return confirm('Delete this donation?');" class="mt-2">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="w-full px-4 py-2 bg-red-600 text-white rounded-lg text-center text-sm font-medium">
+                        <i class="fas fa-trash-alt"></i> Delete
+                    </button>
+                </form>
                 @if(!$donation->verified_at)
                     <form action="{{ route('donations.verify', $donation) }}" method="POST">
                         @csrf

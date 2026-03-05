@@ -53,13 +53,13 @@ class RitualController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'type' => 'required|string',
-            'start_time' => 'required|date_time',
-            'end_time' => 'nullable|date_time|after:start_time',
+            'start_time' => 'required|date',
+            'end_time' => 'nullable|date|after:start_time',
             'location' => 'nullable|string',
             'capacity' => 'nullable|integer|min:1',
             'is_recurring' => 'boolean',
             'recurrence_pattern' => 'nullable|string|required_if:is_recurring,true',
-            'recurrence_end' => 'nullable|date_time',
+            'recurrence_end' => 'nullable|date',
             'requires_registration' => 'boolean',
             'special_notes' => 'nullable|string',
         ]);
@@ -91,8 +91,8 @@ class RitualController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'type' => 'required|string',
-            'start_time' => 'required|date_time',
-            'end_time' => 'nullable|date_time|after:start_time',
+            'start_time' => 'required|date',
+            'end_time' => 'nullable|date|after:start_time',
             'location' => 'nullable|string',
             'capacity' => 'nullable|integer|min:1',
             'special_notes' => 'nullable|string',
@@ -144,5 +144,13 @@ class RitualController extends Controller
         $attendance->update(['checked_out_at' => now()]);
 
         return back()->with('success', 'Member checked out!');
+    }
+
+    public function destroy(Ritual $ritual): RedirectResponse
+    {
+        ActivityLog::log('deleted', 'Ritual', $ritual->id, "Ritual deleted: {$ritual->title}");
+        $ritual->delete();
+
+        return redirect()->route('rituals.index')->with('success', 'Ritual deleted successfully!');
     }
 }

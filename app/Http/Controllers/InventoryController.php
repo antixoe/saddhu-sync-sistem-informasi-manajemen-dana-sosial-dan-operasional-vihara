@@ -67,17 +67,17 @@ class InventoryController extends Controller
         return redirect()->route('inventory.show', $item)->with('success', 'Inventory item created successfully!');
     }
 
-    public function show(InventoryItem $item): View
+    public function show(InventoryItem $inventory): View
     {
-        return view('inventory.show', ['item' => $item]);
+        return view('inventory.show', ['item' => $inventory]);
     }
 
-    public function edit(InventoryItem $item): View
+    public function edit(InventoryItem $inventory): View
     {
-        return view('inventory.edit', ['item' => $item]);
+        return view('inventory.edit', ['item' => $inventory]);
     }
 
-    public function update(Request $request, InventoryItem $item): RedirectResponse
+    public function update(Request $request, InventoryItem $inventory): RedirectResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -90,36 +90,36 @@ class InventoryController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $oldValues = $item->toArray();
-        $item->update($validated);
-        ActivityLog::log('updated', 'InventoryItem', $item->id, "Inventory item updated", $oldValues);
+        $oldValues = $inventory->toArray();
+        $inventory->update($validated);
+        ActivityLog::log('updated', 'InventoryItem', $inventory->id, "Inventory item updated", $oldValues);
 
-        return redirect()->route('inventory.show', $item)->with('success', 'Inventory item updated successfully!');
+        return redirect()->route('inventory.show', $inventory)->with('success', 'Inventory item updated successfully!');
     }
 
-    public function adjustStock(Request $request, InventoryItem $item): RedirectResponse
+    public function adjustStock(Request $request, InventoryItem $inventoryItem): RedirectResponse
     {
         $validated = $request->validate([
             'quantity_change' => 'required|integer',
             'reason' => 'required|string',
         ]);
 
-        $oldQuantity = $item->quantity;
-        $item->update([
-            'quantity' => $item->quantity + $validated['quantity_change'],
+        $oldQuantity = $inventoryItem->quantity;
+        $inventoryItem->update([
+            'quantity' => $inventoryItem->quantity + $validated['quantity_change'],
             'last_updated_at' => now(),
         ]);
 
-        ActivityLog::log('updated', 'InventoryItem', $item->id,
-            "Stock adjusted for {$item->name}: {$oldQuantity} -> {$item->quantity} ({$validated['reason']})");
+        ActivityLog::log('updated', 'InventoryItem', $inventoryItem->id,
+            "Stock adjusted for {$inventoryItem->name}: {$oldQuantity} -> {$inventoryItem->quantity} ({$validated['reason']})");
 
         return back()->with('success', 'Stock adjusted successfully!');
     }
 
-    public function destroy(InventoryItem $item): RedirectResponse
+    public function destroy(InventoryItem $inventory): RedirectResponse
     {
-        ActivityLog::log('deleted', 'InventoryItem', $item->id, "Inventory item '{$item->name}' deleted");
-        $item->delete();
+        ActivityLog::log('deleted', 'InventoryItem', $inventory->id, "Inventory item '{$inventory->name}' deleted");
+        $inventory->delete();
 
         return redirect()->route('inventory.index')->with('success', 'Inventory item deleted successfully!');
     }
