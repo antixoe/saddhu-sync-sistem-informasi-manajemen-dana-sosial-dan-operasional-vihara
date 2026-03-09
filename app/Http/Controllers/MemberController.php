@@ -8,14 +8,20 @@ use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 
 class MemberController extends Controller
 {
     public function index(Request $request): View
     {
         $q = $request->input('q');
-        $query = Member::with('user');
+        $role = $request->input('role');
+        $status = $request->input('status');
+        $sortBy = $request->input('sort', 'latest');
+        
+        $query = Member::query();
 
+        // Search
         if ($q) {
             $query->where(function ($sub) use ($q) {
                 $sub->where('member_id', 'like', "%{$q}%")
@@ -27,12 +33,52 @@ class MemberController extends Controller
             });
         }
 
-        $members = $query->latest()->paginate(20)->withQueryString();
-        $roles = \App\Models\Role::pluck('name'); // available role names for modal
+        // Filter by role
+        if ($role) {
+            $query->whereHas('user', function ($u) use ($role) {
+                $u->where('role', $role);
+            });
+        }
+
+        // Filter by status
+        if ($status !== null && $status !== '') {
+            $isActive = $status === 'active' ? 1 : 0;
+            $query->where('is_active', $isActive);
+        }
+
+        // Sorting
+        switch ($sortBy) {
+            case 'name-asc':
+                $query->join('users', 'users.id', '=', 'members.user_id')
+                      ->select('members.*')
+                      ->orderBy('users.name', 'asc');
+                break;
+            case 'name-desc':
+                $query->join('users', 'users.id', '=', 'members.user_id')
+                      ->select('members.*')
+                      ->orderBy('users.name', 'desc');
+                break;
+            case 'oldest':
+                $query->oldest();
+                break;
+            case 'latest':
+            default:
+                $query->latest();
+        }
+
+        // Always eager load user relationship
+        $members = $query->with('user')->paginate(10)->withQueryString();
+        $allRoles = \App\Models\Role::pluck('name');
 
         return view('members.index', [
             'members' => $members,
-            'roles' => $roles,
+            'roles' => $allRoles,
+            'filters' => [
+                'q' => $q,
+                'role' => $role,
+                'status' => $status,
+                'sort' => $sortBy,
+            ]
         ]);
     }
 
@@ -47,6 +93,7 @@ class MemberController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
+            'password' => 'required|string|min:8',
             'role' => 'required|string|exists:roles,name',
             'phone' => 'nullable|string',
             'birth_date' => 'nullable|date',
@@ -63,7 +110,7 @@ class MemberController extends Controller
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'password' => bcrypt('password123'), // Default password
+            'password' => bcrypt($validated['password']),
             'role' => $validated['role'],
         ]);
 
@@ -133,6 +180,7 @@ class MemberController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $member->user_id,
+            'password' => 'nullable|string|min:8',
             'role' => 'required|string|exists:roles,name',
             'phone' => 'nullable|string',
             'birth_date' => 'nullable|date',
@@ -144,11 +192,18 @@ class MemberController extends Controller
         ]);
 
         // Update user
-        $member->user->update([
+        $userUpdateData = [
             'name' => $validated['name'],
             'email' => $validated['email'],
             'role' => $validated['role'],
-        ]);
+        ];
+
+        // Only update password if provided
+        if (!empty($validated['password'])) {
+            $userUpdateData['password'] = bcrypt($validated['password']);
+        }
+
+        $member->user->update($userUpdateData);
 
         // Update member
         $oldValues = $member->toArray();

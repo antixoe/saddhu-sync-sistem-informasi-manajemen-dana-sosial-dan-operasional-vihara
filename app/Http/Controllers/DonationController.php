@@ -102,14 +102,44 @@ class DonationController extends Controller
     /**
      * Public donation form accessible without authentication.
      */
-    public function publicCreate(): View
+    public function publicCreate(Request $request): View
     {
         $fundCategories = FundCategory::all();
         $qrCode = Setting::getValue('donation_qr_code');
         $bankDetails = Setting::getValue('donation_bank_details');
         $virtualAccounts = Setting::getValue('donation_virtual_accounts');
 
-        return view('donations.public', compact('fundCategories', 'qrCode', 'bankDetails', 'virtualAccounts'));
+        // Pre-fill form data from URL parameters
+        $preFillData = [
+            'fund_category_id' => $request->query('fund_category_id'),
+            'donation_method' => $request->query('donation_method'),
+        ];
+
+        // Map payment method from URL to form values
+        if ($preFillData['donation_method']) {
+            $methodMapping = [
+                'qris' => 'qris',
+                'bank' => 'bank_transfer',
+                'virtual' => 'virtual',
+                'cash' => 'cash',
+            ];
+            $preFillData['donation_method'] = $methodMapping[$preFillData['donation_method']] ?? $preFillData['donation_method'];
+        }
+
+        return view('donations.public', compact('fundCategories', 'qrCode', 'bankDetails', 'virtualAccounts', 'preFillData'));
+    }
+
+    /**
+     * Public donation menu page.
+     */
+    public function menu(): View
+    {
+        $fundCategories = FundCategory::all();
+        $qrCode = Setting::getValue('donation_qr_code');
+        $bankDetails = Setting::getValue('donation_bank_details');
+        $virtualAccounts = Setting::getValue('donation_virtual_accounts');
+
+        return view('donations.menu', compact('fundCategories', 'qrCode', 'bankDetails', 'virtualAccounts'));
     }
 
     /**

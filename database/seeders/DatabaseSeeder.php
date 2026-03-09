@@ -18,6 +18,9 @@ class DatabaseSeeder extends Seeder
         // Seed fund categories
         $this->call(FundCategorySeeder::class);
 
+        // Seed settings for donations
+        $this->call(SettingSeeder::class);
+
         // create basic roles table entries so admins can manage them
         if (\App\Models\Role::count() === 0) {
             \App\Models\Role::insert([

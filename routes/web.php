@@ -20,6 +20,7 @@ Route::get('/', function () {
 })->name('home');
 
 // donation page for general visitors
+Route::get('/donations/menu', [DonationController::class, 'menu'])->name('donations.menu');
 Route::get('/donate', [DonationController::class, 'publicCreate'])->name('donate');
 Route::post('/donate', [DonationController::class, 'publicStore'])->name('donate.store');
 Route::get('/donate/thankyou', [DonationController::class, 'thankyou'])->name('donate.thankyou');

@@ -70,6 +70,27 @@
                     @enderror
                 </div>
 
+                <!-- Password -->
+                <div class="md:col-span-2">
+                    <label for="password" class="block text-sm font-semibold text-deep-brown mb-2">
+                        <i class="fas fa-lock text-saffron"></i> Password *
+                    </label>
+                    <div class="flex gap-2">
+                        <input type="text" name="password" id="password" required
+                            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-saffron focus:ring-2 focus:ring-saffron/20"
+                            value="{{ old('password') }}">
+                        <button type="button" onclick="generatePassword()" class="px-4 py-2 bg-saffron text-white rounded-lg hover:bg-saffron/90 transition-colors font-medium">
+                            <i class="fas fa-refresh"></i> Generate
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-600 mt-1">
+                        <i class="fas fa-info-circle"></i> Share this password with the member for their first login
+                    </p>
+                    @error('password')
+                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <!-- Phone -->
                 <div>
                     <label for="phone" class="block text-sm font-semibold text-deep-brown mb-2">
@@ -160,7 +181,18 @@
 
 @push('scripts')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js" integrity="sha512-+/4ODD9CFmQ2wXYSPTDaJCW+U8URq4nqZNcYlVv+bU4VPkCnHQysdOkqD3UBqUGvmV9pUz+Jq3dLdFi78GX4mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script>let cropper;
+<script>
+function generatePassword() {
+    const length = 12;
+    const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+    let password = '';
+    for (let i = 0; i < length; i++) {
+        password += charset.charAt(Math.floor(Math.random() * charset.length));
+    }
+    document.getElementById('password').value = password;
+}
+
+let cropper;
 function openCrop(){
     const modal = document.getElementById('cropModal');
     modal.classList.remove('hidden');

@@ -9,24 +9,55 @@
     <div>
         <p class="text-gray-600">Total Events: <span class="font-bold text-deep-brown">{{ $rituals->total() }}</span></p>
     </div>
-    <div class="flex items-center space-x-4">
-        <select class="px-4 py-2 border border-gray-300 rounded-lg text-sm" onchange="filterByType(this.value)">
-            <option value="">All Types</option>
-            @foreach($types as $t)
-                <option value="{{ $t }}" {{ request('type') == $t ? 'selected' : '' }}>{{ ucfirst($t) }}</option>
-            @endforeach
-        </select>
-        <form method="GET" action="{{ route('rituals.index') }}" class="flex items-center gap-0">
-            <input type="hidden" name="type" value="{{ request('type') }}" />
-            <input type="text" name="q" placeholder="Search rituals..." value="{{ request('q') }}" class="px-3 py-2 border border-gray-300 rounded-l-md text-sm" />
-            <button type="submit" class="px-3 py-2 bg-saffron text-white text-sm border-l border-orange-400"><i class="fas fa-search"></i></button>
-            <a href="{{ route('rituals.index') }}" class="px-3 py-2 bg-gray-400 text-white rounded-r-md text-sm hover:bg-gray-500"><i class="fas fa-times"></i></a>
-        </form>
-    </div>
     <button onclick="openModal('createRitualModal')" class="btn-spiritual px-6 py-2 text-white rounded-lg font-medium flex items-center space-x-2">
         <i class="fas fa-plus"></i>
         <span>Add Ritual/Event</span>
     </button>
+</div>
+
+{{-- Filter and Sort Controls --}}
+<div class="card-spiritual p-4 mb-6">
+    <form method="GET" action="{{ route('rituals.index') }}" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+            <!-- Search -->
+            <div>
+                <label for="q" class="block text-sm font-semibold text-gray-700 mb-2">Search</label>
+                <input type="text" name="q" id="q" placeholder="Search rituals..." value="{{ $filters['q'] ?? '' }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-saffron focus:ring-2 focus:ring-saffron/20" />
+            </div>
+
+            <!-- Type Filter -->
+            <div>
+                <label for="type" class="block text-sm font-semibold text-gray-700 mb-2">Type</label>
+                <select name="type" id="type" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-saffron focus:ring-2 focus:ring-saffron/20">
+                    <option value="">All Types</option>
+                    @foreach($types as $t)
+                        <option value="{{ $t }}" {{ ($filters['type'] ?? '') == $t ? 'selected' : '' }}>{{ ucfirst(str_replace('_', ' ', $t)) }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Sort By -->
+            <div>
+                <label for="sort" class="block text-sm font-semibold text-gray-700 mb-2">Sort By</label>
+                <select name="sort" id="sort" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-saffron focus:ring-2 focus:ring-saffron/20">
+                    <option value="latest" {{ ($filters['sort'] ?? 'latest') == 'latest' ? 'selected' : '' }}>Latest</option>
+                    <option value="oldest" {{ ($filters['sort'] ?? '') == 'oldest' ? 'selected' : '' }}>Oldest</option>
+                    <option value="earliest_date" {{ ($filters['sort'] ?? '') == 'earliest_date' ? 'selected' : '' }}>Earliest Date</option>
+                    <option value="latest_date" {{ ($filters['sort'] ?? '') == 'latest_date' ? 'selected' : '' }}>Latest Date</option>
+                </select>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex gap-2">
+                <button type="submit" class="flex-1 px-4 py-2 bg-saffron text-white rounded-lg text-sm hover:bg-orange-600 transition">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+                <a href="{{ route('rituals.index') }}" class="flex-1 px-4 py-2 bg-gray-400 text-white rounded-lg text-sm hover:bg-gray-500 transition text-center">
+                    <i class="fas fa-times"></i> Clear
+                </a>
+            </div>
+        </div>
+    </form>
 </div>
 
 <div class="space-y-4">
@@ -75,7 +106,46 @@
 </div>
 
 <div class="mt-6">
-    {{ $rituals->links() }}
+    {{-- Custom Pagination Buttons --}}
+    <div class="flex items-center justify-between">
+        <p class="text-sm text-gray-600">
+            Showing {{ $rituals->firstItem() ?? 0 }} to {{ $rituals->lastItem() ?? 0 }} of {{ $rituals->total() }} events
+        </p>
+        <div class="flex items-center gap-2">
+            {{-- Previous Button --}}
+            @if($rituals->onFirstPage())
+                <button disabled class="px-3 py-2 border border-gray-300 text-gray-400 rounded-lg cursor-not-allowed">
+                    <i class="fas fa-chevron-left"></i> Previous
+                </button>
+            @else
+                <a href="{{ $rituals->previousPageUrl() }}" class="px-3 py-2 border border-saffron text-saffron hover:bg-saffron hover:text-white rounded-lg transition">
+                    <i class="fas fa-chevron-left"></i> Previous
+                </a>
+            @endif
+
+            {{-- Page Numbers --}}
+            <div class="flex gap-1">
+                @for ($i = 1; $i <= $rituals->lastPage(); $i++)
+                    @if ($i == $rituals->currentPage())
+                        <button disabled class="px-3 py-2 bg-saffron text-white rounded-lg font-semibold">{{ $i }}</button>
+                    @else
+                        <a href="{{ $rituals->url($i) }}" class="px-3 py-2 border border-gray-300 hover:border-saffron hover:text-saffron rounded-lg transition">{{ $i }}</a>
+                    @endif
+                @endfor
+            </div>
+
+            {{-- Next Button --}}
+            @if($rituals->hasMorePages())
+                <a href="{{ $rituals->nextPageUrl() }}" class="px-3 py-2 border border-saffron text-saffron hover:bg-saffron hover:text-white rounded-lg transition">
+                    Next <i class="fas fa-chevron-right"></i>
+                </a>
+            @else
+                <button disabled class="px-3 py-2 border border-gray-300 text-gray-400 rounded-lg cursor-not-allowed">
+                    Next <i class="fas fa-chevron-right"></i>
+                </button>
+            @endif
+        </div>
+    </div>
 </div>
 
 <!-- create ritual modal -->

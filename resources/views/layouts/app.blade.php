@@ -205,9 +205,13 @@
                     <i class="fas fa-bell w-5"></i>
                     <span>Rituals & Events</span>
                 </a>
-                <a href="{{ route('donations.index') }}" class="nav-link px-4 py-3 rounded-lg flex items-center space-x-3 text-sm transition border-l-4 border-transparent {{ request()->routeIs('donations.*') ? 'active' : '' }}">
+                <a href="{{ route('donations.index') }}" class="nav-link px-4 py-3 rounded-lg flex items-center space-x-3 text-sm transition border-l-4 border-transparent {{ request()->routeIs('donations.index', 'donations.show', 'donations.edit', 'donations.create') ? 'active' : '' }}">
                     <i class="fas fa-hands-praying w-5"></i>
                     <span>Donations</span>
+                </a>
+                <a href="{{ route('donations.menu') }}" class="nav-link px-4 py-3 rounded-lg flex items-center space-x-3 text-sm transition border-l-4 border-transparent {{ request()->routeIs('donations.menu') ? 'active' : '' }}">
+                    <i class="fas fa-donate w-5"></i>
+                    <span>Donation Menu</span>
                 </a>
 
                 <div class="px-4 py-2 text-xs font-semibold text-amber-200 uppercase tracking-wider mt-4">Resources</div>

@@ -10,22 +10,79 @@
 
 @section('content')
 <div class="flex justify-between items-center mb-6">
-    <div class="flex items-center space-x-4">
-        <p class="text-gray-600">Total Members: <span class="font-bold text-deep-brown">{{ $members->total() }}</span></p>
-        <form method="GET" action="{{ route('members.index') }}" class="flex items-center gap-0">
-            <input type="text" name="q" placeholder="Search members..." value="{{ request('q') }}" class="px-3 py-2 border border-gray-300 rounded-l-md text-sm" />
-            <button type="submit" class="px-3 py-2 bg-saffron text-white text-sm border-l border-orange-400">
-                <i class="fas fa-search"></i>
-            </button>
-            <a href="{{ route('members.index') }}" class="px-3 py-2 bg-gray-400 text-white rounded-r-md text-sm hover:bg-gray-500">
-                <i class="fas fa-times"></i>
-            </a>
-        </form>
+    <div>
+        <p class="text-gray-600 mb-3">Total Members: <span class="font-bold text-deep-brown">{{ $members->total() }}</span></p>
     </div>
     <button onclick="openModal('createMemberModal')" class="btn-spiritual px-6 py-2 text-white rounded-lg font-medium flex items-center space-x-2">
         <i class="fas fa-plus"></i>
         <span>Add Member</span>
     </button>
+</div>
+
+<!-- Filters and Search Section -->
+<div class="card-spiritual p-6 mb-6">
+    <form method="GET" action="{{ route('members.index') }}" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+            <!-- Search -->
+            <div>
+                <label class="block text-sm font-semibold text-deep-brown mb-2">
+                    <i class="fas fa-search text-saffron"></i> Search
+                </label>
+                <input type="text" name="q" placeholder="Search members..." value="{{ $filters['q'] ?? '' }}" 
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-saffron focus:ring-1 focus:ring-saffron" />
+            </div>
+
+            <!-- Filter by Role -->
+            <div>
+                <label class="block text-sm font-semibold text-deep-brown mb-2">
+                    <i class="fas fa-user-tag text-saffron"></i> Role
+                </label>
+                <select name="role" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-saffron focus:ring-1 focus:ring-saffron">
+                    <option value="">All Roles</option>
+                    @foreach($roles as $r)
+                        <option value="{{ $r }}" {{ ($filters['role'] ?? '') == $r ? 'selected' : '' }}>
+                            {{ ucfirst($r) }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Filter by Status -->
+            <div>
+                <label class="block text-sm font-semibold text-deep-brown mb-2">
+                    <i class="fas fa-traffic-light text-saffron"></i> Status
+                </label>
+                <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-saffron focus:ring-1 focus:ring-saffron">
+                    <option value="">All Status</option>
+                    <option value="active" {{ ($filters['status'] ?? '') == 'active' ? 'selected' : '' }}>Active</option>
+                    <option value="inactive" {{ ($filters['status'] ?? '') == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                </select>
+            </div>
+
+            <!-- Sort By -->
+            <div>
+                <label class="block text-sm font-semibold text-deep-brown mb-2">
+                    <i class="fas fa-sort text-saffron"></i> Sort By
+                </label>
+                <select name="sort" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-saffron focus:ring-1 focus:ring-saffron">
+                    <option value="latest" {{ ($filters['sort'] ?? 'latest') == 'latest' ? 'selected' : '' }}>Latest</option>
+                    <option value="oldest" {{ ($filters['sort'] ?? '') == 'oldest' ? 'selected' : '' }}>Oldest</option>
+                    <option value="name-asc" {{ ($filters['sort'] ?? '') == 'name-asc' ? 'selected' : '' }}>Name (A-Z)</option>
+                    <option value="name-desc" {{ ($filters['sort'] ?? '') == 'name-desc' ? 'selected' : '' }}>Name (Z-A)</option>
+                </select>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-2">
+                <button type="submit" class="flex-1 px-4 py-2 bg-saffron text-white rounded-lg hover:bg-saffron/90 transition-colors font-medium text-sm">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+                <a href="{{ route('members.index') }}" class="flex-1 px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition-colors font-medium text-sm text-center">
+                    <i class="fas fa-times"></i> Clear
+                </a>
+            </div>
+        </div>
+    </form>
 </div>
 
 <div class="card-spiritual overflow-hidden">
@@ -78,9 +135,51 @@
     </div>
 </div>
 
-<div class="mt-6">
-    {{ $members->links() }}
+<!-- Pagination Section -->
+@if($members->hasPages())
+<div class="card-spiritual p-6 mt-6">
+    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="text-sm text-gray-600">
+            Showing <span class="font-semibold">{{ $members->firstItem() }}</span> to 
+            <span class="font-semibold">{{ $members->lastItem() }}</span> of 
+            <span class="font-semibold">{{ $members->total() }}</span> members
+        </div>
+        
+        <div class="flex gap-2 flex-wrap justify-center">
+            {{-- Previous Page --}}
+            @if ($members->onFirstPage())
+                <span class="px-3 py-2 bg-gray-200 text-gray-500 rounded-lg text-sm cursor-not-allowed">
+                    <i class="fas fa-chevron-left"></i>
+                </span>
+            @else
+                <a href="{{ $members->previousPageUrl() }}" class="px-3 py-2 bg-saffron text-white rounded-lg hover:bg-saffron/90 transition-colors text-sm">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            @endif
+
+            {{-- Page Numbers --}}
+            @foreach ($members->getUrlRange(1, $members->lastPage()) as $page => $url)
+                @if ($page == $members->currentPage())
+                    <span class="px-3 py-2 bg-saffron text-white rounded-lg font-semibold text-sm">{{ $page }}</span>
+                @else
+                    <a href="{{ $url }}" class="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm">{{ $page }}</a>
+                @endif
+            @endforeach
+
+            {{-- Next Page --}}
+            @if ($members->hasMorePages())
+                <a href="{{ $members->nextPageUrl() }}" class="px-3 py-2 bg-saffron text-white rounded-lg hover:bg-saffron/90 transition-colors text-sm">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            @else
+                <span class="px-3 py-2 bg-gray-200 text-gray-500 rounded-lg text-sm cursor-not-allowed">
+                    <i class="fas fa-chevron-right"></i>
+                </span>
+            @endif
+        </div>
+    </div>
 </div>
+@endif
 
 <!-- create member modal -->
 <div id="createMemberModal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 hidden z-50">
@@ -113,6 +212,27 @@
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-saffron focus:ring-2 focus:ring-saffron/20"
                         value="{{ old('email') }}">
                     @error('email')
+                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Password -->
+                <div class="md:col-span-2">
+                    <label for="modal_password" class="block text-sm font-semibold text-deep-brown mb-2">
+                        <i class="fas fa-lock text-saffron"></i> Password *
+                    </label>
+                    <div class="flex gap-2">
+                        <input type="text" name="password" id="modal_password" required
+                            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-saffron focus:ring-2 focus:ring-saffron/20"
+                            value="{{ old('password') }}">
+                        <button type="button" onclick="generatePasswordModal()" class="px-4 py-2 bg-saffron text-white rounded-lg hover:bg-saffron/90 transition-colors font-medium whitespace-nowrap">
+                            <i class="fas fa-refresh"></i> Generate
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-600 mt-1">
+                        <i class="fas fa-info-circle"></i> Share this password with the member for their first login
+                    </p>
+                    @error('password')
                         <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                     @enderror
                 </div>
@@ -242,6 +362,16 @@
 @push('scripts')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js" integrity="sha512-+/4ODD9CFmQ2wXYSPTDaJCW+U8URq4nqZNcYlVv+bU4VPkCnHQysdOkqD3UBqUGvmV9pUz+Jq3dLdFi78GX4mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
+function generatePasswordModal() {
+    const length = 12;
+    const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+    let password = '';
+    for (let i = 0; i < length; i++) {
+        password += charset.charAt(Math.floor(Math.random() * charset.length));
+    }
+    document.getElementById('modal_password').value = password;
+}
+
 let cropper;
 
 function openCrop(){ 

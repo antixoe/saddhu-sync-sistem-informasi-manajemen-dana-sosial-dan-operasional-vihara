@@ -6,6 +6,13 @@
 
 @section('content')
     <div class="max-w-2xl mx-auto space-y-6">
+        {{-- Back button --}}
+        <div>
+            <a href="javascript:history.back()" class="inline-flex items-center gap-2 text-saffron hover:text-deep-brown transition">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+
         {{-- Instructions pulled from settings --}}
         @if($qrCode)
             <div class="card-spiritual p-6 text-center">
@@ -41,7 +48,7 @@
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-saffron focus:ring-2 focus:ring-saffron/20">
                         <option value="">-- Select Category --</option>
                         @foreach($fundCategories as $category)
-                            <option value="{{ $category->id }}" {{ old('fund_category_id') == $category->id ? 'selected' : '' }}>
+                            <option value="{{ $category->id }}" {{ (old('fund_category_id', $preFillData['fund_category_id'] ?? null) == $category->id) ? 'selected' : '' }}>
                                 {{ $category->name }}
                             </option>
                         @endforeach
@@ -69,10 +76,10 @@
                     </label>
                     <select name="donation_method" id="donation_method" required
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-saffron focus:ring-2 focus:ring-saffron/20">
-                        <option value="qris" {{ old('donation_method') == 'qris' ? 'selected' : '' }}>QRIS / QR Code</option>
-                        <option value="bank_transfer" {{ old('donation_method') == 'bank_transfer' ? 'selected' : '' }}>Bank Transfer</option>
-                        <option value="virtual" {{ old('donation_method') == 'virtual' ? 'selected' : '' }}>Other Virtual Payment</option>
-                        <option value="cash" {{ old('donation_method') == 'cash' ? 'selected' : '' }}>Cash</option>
+                        <option value="qris" {{ (old('donation_method', $preFillData['donation_method'] ?? null) == 'qris') ? 'selected' : '' }}>QRIS / QR Code</option>
+                        <option value="bank_transfer" {{ (old('donation_method', $preFillData['donation_method'] ?? null) == 'bank_transfer') ? 'selected' : '' }}>Bank Transfer</option>
+                        <option value="virtual" {{ (old('donation_method', $preFillData['donation_method'] ?? null) == 'virtual') ? 'selected' : '' }}>Other Virtual Payment</option>
+                        <option value="cash" {{ (old('donation_method', $preFillData['donation_method'] ?? null) == 'cash') ? 'selected' : '' }}>Cash</option>
                     </select>
                     @error('donation_method')
                         <p class="text-red-600 text-sm mt-1">{{ $message }}</p>

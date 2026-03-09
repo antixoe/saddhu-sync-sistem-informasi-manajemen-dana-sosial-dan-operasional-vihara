@@ -17,12 +17,10 @@ class RitualController extends Controller
     {
         $q = $request->input('q');
         $type = $request->input('type');
-        $query = Ritual::orderBy('start_time');
+        $sortBy = $request->input('sort', 'latest');
+        $query = Ritual::query();
 
-        if ($type) {
-            $query->where('type', $type);
-        }
-
+        // Search
         if ($q) {
             $query->where(function ($sub) use ($q) {
                 $sub->where('title', 'like', "%{$q}%")
@@ -31,7 +29,28 @@ class RitualController extends Controller
             });
         }
 
-        $rituals = $query->paginate(20)->withQueryString();
+        // Filter by type
+        if ($type) {
+            $query->where('type', $type);
+        }
+
+        // Sorting
+        switch ($sortBy) {
+            case 'earliest_date':
+                $query->orderBy('start_time', 'asc');
+                break;
+            case 'latest_date':
+                $query->orderBy('start_time', 'desc');
+                break;
+            case 'oldest':
+                $query->oldest();
+                break;
+            case 'latest':
+            default:
+                $query->latest();
+        }
+
+        $rituals = $query->paginate(10)->withQueryString();
         
         // Get all unique ritual types
         $types = Ritual::distinct()->pluck('type')->sort()->filter()->values();
@@ -39,6 +58,11 @@ class RitualController extends Controller
         return view('rituals.index', [
             'rituals' => $rituals,
             'types' => $types,
+            'filters' => [
+                'q' => $q,
+                'type' => $type,
+                'sort' => $sortBy,
+            ]
         ]);
     }
 
