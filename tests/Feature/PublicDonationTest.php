@@ -28,6 +28,15 @@ class PublicDonationTest extends TestCase
             'fund_category_id' => $category->id,
             'amount' => 50000,
             'donation_method' => 'qris',
+            // new address/contact fields
+            'province' => 'Jawa Barat',
+            'city' => 'Bandung',
+            'postal_code' => '12345',
+            'address' => '123 Test Lane',
+            'latitude' => '-6.2000000',
+            'longitude' => '106.8166660',
+            'contact_name' => 'John Doe',
+            'contact_phone' => '081234567890',
         ]);
 
         $response->assertRedirect(route('donate.thankyou'));
@@ -36,6 +45,14 @@ class PublicDonationTest extends TestCase
             'fund_category_id' => $category->id,
             'amount' => 50000,
             'donation_method' => 'qris',
+            'province' => 'Jawa Barat',
+            'city' => 'Bandung',
+            'postal_code' => '12345',
+            'address' => '123 Test Lane',
+            'latitude' => '-6.2000000',
+            'longitude' => '106.8166660',
+            'contact_name' => 'John Doe',
+            'contact_phone' => '081234567890',
         ]);
     }
 

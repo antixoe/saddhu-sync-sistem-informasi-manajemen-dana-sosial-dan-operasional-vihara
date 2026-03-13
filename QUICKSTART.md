@@ -161,6 +161,7 @@ routes/
 
 Members can now set their address by choosing a location on a map. The create/edit form includes an interactive Google Map with a draggable marker; moving the pin updates the address field (and stores latitude/longitude for later use). Make sure a `GOOGLE_MAPS_KEY` is defined in your `.env` and `config/services.php` is updated accordingly.
 
+The public donation form also provides a polished address input: province/city/postal code selectors plus a Leaflet map for optional geolocation. Donor messages and contact details are still accepted as before.
 ## �🔐 User Roles
 
 There is now a dedicated **Roles** screen under Operations where administrators can create, edit and delete role entries. The table is seeded with `admin`, `officer` and `member` by default but you may add additional types such as `volunteer` or `guest`.

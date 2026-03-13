@@ -153,11 +153,27 @@ class DonationController extends Controller
             'donation_method' => 'required|string',
             'transaction_id' => 'nullable|string|unique:donations',
             'notes' => 'nullable|string',
+            'address' => 'nullable|string',
+            'city' => 'nullable|string',
+            'province' => 'nullable|string',
+            'postal_code' => 'nullable|string',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
+            'contact_name' => 'nullable|string|max:255',
+            'contact_phone' => 'nullable|string|max:50',
         ]);
 
         $validated['donated_at'] = now();
         // treat all public submissions as anonymous by default
         $validated['is_anonymous'] = true;
+
+        // optionally capture coordinates (may not be provided)
+        if (isset($validated['latitude']) && isset($validated['longitude'])) {
+            $validated['latitude'] = floatval($validated['latitude']);
+            $validated['longitude'] = floatval($validated['longitude']);
+        }
+
+        // contact fields are passed through directly if present
 
         $donation = Donation::create($validated);
 

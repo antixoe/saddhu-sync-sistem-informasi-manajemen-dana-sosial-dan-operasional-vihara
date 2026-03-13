@@ -225,11 +225,23 @@
                 </a>
 
                 <div class="px-4 py-2 text-xs font-semibold text-amber-200 uppercase tracking-wider mt-4">Reports</div>
-                <a href="{{ route('reports.financial-summary') }}" class="nav-link px-4 py-3 rounded-lg flex items-center space-x-3 text-sm transition border-l-4 border-transparent {{ request()->routeIs('reports.*') ? 'active' : '' }}">
+                <a href="{{ route('reports.financial-summary') }}" class="nav-link px-4 py-3 rounded-lg flex items-center space-x-3 text-sm transition border-l-4 border-transparent {{ request()->routeIs('reports.financial-summary') ? 'active' : '' }}">
                     <i class="fas fa-chart-pie w-5"></i>
                     <span>Financial</span>
                 </a>
-                <a href="{{ route('reports.activity-log') }}" class="nav-link px-4 py-3 rounded-lg flex items-center space-x-3 text-sm transition border-l-4 border-transparent">
+                <a href="{{ route('reports.donations') }}" class="nav-link px-4 py-3 rounded-lg flex items-center space-x-3 text-sm transition border-l-4 border-transparent {{ request()->routeIs('reports.donations') ? 'active' : '' }}">
+                    <i class="fas fa-hand-holding-hand w-5"></i>
+                    <span>Donations</span>
+                </a>
+                <a href="{{ route('reports.inventory') }}" class="nav-link px-4 py-3 rounded-lg flex items-center space-x-3 text-sm transition border-l-4 border-transparent {{ request()->routeIs('reports.inventory') ? 'active' : '' }}">
+                    <i class="fas fa-warehouse w-5"></i>
+                    <span>Inventory</span>
+                </a>
+                <a href="{{ route('reports.schedule') }}" class="nav-link px-4 py-3 rounded-lg flex items-center space-x-3 text-sm transition border-l-4 border-transparent {{ request()->routeIs('reports.schedule') ? 'active' : '' }}">
+                    <i class="fas fa-calendar-days w-5"></i>
+                    <span>Schedule</span>
+                </a>
+                <a href="{{ route('reports.activity-log') }}" class="nav-link px-4 py-3 rounded-lg flex items-center space-x-3 text-sm transition border-l-4 border-transparent {{ request()->routeIs('reports.activity-log') ? 'active' : '' }}">
                     <i class="fas fa-history w-5"></i>
                     <span>Activity Log</span>
                 </a>

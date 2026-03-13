@@ -16,6 +16,14 @@ class Donation extends Model
         'donation_method',
         'transaction_id',
         'notes',
+        'address',
+        'city',
+        'province',
+        'postal_code',
+        'latitude',
+        'longitude',
+        'contact_name',
+        'contact_phone',
         'is_anonymous',
         'is_regular',
         'frequency',
@@ -31,6 +39,11 @@ class Donation extends Model
         'donated_at' => 'datetime',
         'verified_at' => 'datetime',
         'receipt_sent' => 'boolean',
+        'latitude' => 'float',
+        'longitude' => 'float',
+        // contact info stored as strings
+        'contact_name' => 'string',
+        'contact_phone' => 'string',
     ];
 
     public function member()

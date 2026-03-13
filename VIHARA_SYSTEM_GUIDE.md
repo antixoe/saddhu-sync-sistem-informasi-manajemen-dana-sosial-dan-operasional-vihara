@@ -123,6 +123,8 @@ A new **Roles** management page allows administrators to define what roles exist
 ### Map‑based address entry
 Member registration now leverages the Google Maps API. When adding or editing a member the form displays an embedded map with a draggable marker; the selected position fills the address field and stores latitude/longitude values in the database. This requires a valid `GOOGLE_MAPS_KEY` in your environment and `config/services.php`.
 
+Public donation submissions also offer a more professional address interface: donors choose province/city from dropdowns and can optionally pick a point on an embedded Leaflet map. Latitude/longitude coordinates are saved if provided.
+
 
 1. **Admin**: Full system access
 2. **Officer**: Manage donations, members, events

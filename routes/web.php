@@ -117,10 +117,15 @@ Route::middleware(['auth'])->group(function () {
 
     // Reports
     Route::get('/reports/donations', [ReportController::class, 'donations'])->name('reports.donations');
+    Route::get('/reports/donations/export', [ReportController::class, 'donationsExport'])->name('reports.donations.export');
     Route::get('/reports/expenses', [ReportController::class, 'expenses'])->name('reports.expenses');
     Route::get('/reports/member-activity', [ReportController::class, 'memberActivity'])->name('reports.member-activity');
     Route::get('/reports/activity-log', [ReportController::class, 'activityLog'])->name('reports.activity-log');
     Route::get('/reports/financial-summary', [ReportController::class, 'financialSummary'])->name('reports.financial-summary');
+    Route::get('/reports/inventory', [ReportController::class, 'inventory'])->name('reports.inventory');
+    Route::get('/reports/inventory/export', [ReportController::class, 'inventoryExport'])->name('reports.inventory.export');
+    Route::get('/reports/schedule', [ReportController::class, 'schedule'])->name('reports.schedule');
+    Route::get('/reports/schedule/export', [ReportController::class, 'scheduleExport'])->name('reports.schedule.export');
     
     // Application settings
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
